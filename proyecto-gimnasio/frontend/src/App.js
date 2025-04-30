@@ -1,23 +1,25 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from "react";
 
 function App() {
+  const [activities, setActivities] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:8080/activities")
+      .then((res) => res.json())
+      .then((data) => setActivities(data))
+      .catch((err) => console.error("Error al obtener actividades:", err));
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ padding: "2rem" }}>
+      <h1>Actividades disponibles</h1>
+      <ul>
+        {activities.map((activity) => (
+          <li key={activity.ID}>
+            <strong>{activity.name}</strong> - {activity.day} - {activity.hour}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

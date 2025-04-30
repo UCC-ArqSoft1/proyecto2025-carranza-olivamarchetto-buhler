@@ -5,6 +5,7 @@ import (
 	"proyecto-gimnasio/config"
 	"proyecto-gimnasio/routes"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 )
 
 func main() {
@@ -13,6 +14,8 @@ func main() {
 
 	// Crear instancia de router Gin
 	router := gin.Default()
+    
+	router.Use(cors.Default())
 
 	// Configurar rutas
 	routes.SetupRoutes(router)
