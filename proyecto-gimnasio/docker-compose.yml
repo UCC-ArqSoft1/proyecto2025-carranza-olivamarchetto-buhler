@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   db:
     image: mysql:8.0
@@ -7,12 +8,14 @@ services:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: gimnasio
     ports:
-      - "3307:3306"  # Cambiar el puerto del host
+      - "3307:3306"
     volumes:
       - dbdata:/var/lib/mysql
 
   backend:
-    build: .
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: gimnasio_backend
     ports:
       - "8080:8080"
@@ -33,7 +36,9 @@ services:
       - ./frontend:/app
     ports:
       - "3000:3000"
-    command: sh -c "npm install && npm run dev"
+    command: sh -c "npm install && npm start"
+    depends_on:
+      - backend
 
 volumes:
   dbdata:
