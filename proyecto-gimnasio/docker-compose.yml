@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    container_name: gimnasio_db
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: gimnasio
+    ports:
+      - "3307:3306"  # Cambiar el puerto del host
+    volumes:
+      - dbdata:/var/lib/mysql
+
+  backend:
+    build: .
+    container_name: gimnasio_backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: password
+      DB_NAME: gimnasio
+      JWT_SECRET: secreto
+
+  frontend:
+    image: node:20-alpine
+    container_name: gimnasio_frontend
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install && npm run dev"
+
+volumes:
+  dbdata:
