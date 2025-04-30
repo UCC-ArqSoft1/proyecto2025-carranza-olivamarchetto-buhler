@@ -16,5 +16,8 @@ func SetupRoutes(router *gin.Engine) {
 
     router.GET("/activities", controllers.ListActivities)
 	router.POST("/register", controllers.RegisterUser)
-
+	router.GET("/activities/:id", controllers.GetActivityByID)
+	router.POST("/activities/enroll", controllers.EnrollUserInActivity)
+	router.GET("/users/:user_id/activities", controllers.GetUserActivities)
+	
 }

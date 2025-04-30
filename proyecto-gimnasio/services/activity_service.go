@@ -17,3 +17,10 @@ func GetAllActivities() ([]models.Activity, error) {
     result := db.Find(&activities)
     return activities, result.Error
 }
+func GetActivityByID(id string) (models.Activity, error) {
+    db := config.ConnectDB()
+    var activity models.Activity
+    result := db.First(&activity, id)
+    return activity, result.Error
+}
+

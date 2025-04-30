@@ -34,3 +34,13 @@ func ListActivities(c *gin.Context) {
 
     c.JSON(http.StatusOK, activities)
 }
+
+func GetActivityByID(c *gin.Context) {
+    id := c.Param("id")
+    activity, err := services.GetActivityByID(id)
+    if err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "Actividad no encontrada"})
+        return
+    }
+    c.JSON(http.StatusOK, activity)
+}
