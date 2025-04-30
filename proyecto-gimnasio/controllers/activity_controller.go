@@ -44,3 +44,32 @@ func GetActivityByID(c *gin.Context) {
     }
     c.JSON(http.StatusOK, activity)
 }
+func UpdateActivity(c *gin.Context) {
+    id := c.Param("id")
+    var updatedData models.Activity
+
+    if err := c.ShouldBindJSON(&updatedData); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
+        return
+    }
+
+    err := services.UpdateActivity(id, updatedData)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo actualizar la actividad"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "Actividad actualizada con éxito"})
+}
+
+func DeleteActivity(c *gin.Context) {
+    id := c.Param("id")
+
+    err := services.DeleteActivity(id)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo eliminar la actividad"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "Actividad eliminada con éxito"})
+}

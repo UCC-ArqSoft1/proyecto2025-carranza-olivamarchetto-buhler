@@ -24,3 +24,23 @@ func GetActivityByID(id string) (models.Activity, error) {
     return activity, result.Error
 }
 
+func UpdateActivity(id string, updated models.Activity) error {
+    db := config.ConnectDB()
+    var activity models.Activity
+
+    if err := db.First(&activity, id).Error; err != nil {
+        return err
+    }
+
+    activity.Name = updated.Name
+    activity.Day = updated.Day
+    activity.Hour = updated.Hour
+    activity.Capacity = updated.Capacity
+    activity.Category = updated.Category
+
+    return db.Save(&activity).Error
+}
+func DeleteActivity(id string) error {
+    db := config.ConnectDB()
+    return db.Delete(&models.Activity{}, id).Error
+}
