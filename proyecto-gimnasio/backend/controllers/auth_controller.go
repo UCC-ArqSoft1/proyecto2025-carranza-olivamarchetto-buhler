@@ -2,9 +2,10 @@ package controllers
 
 import (
 	"net/http"
-	"proyecto-gimnasio/services"
-	"proyecto-gimnasio/models"
 	"proyecto-gimnasio/config"
+	"proyecto-gimnasio/models"
+	"proyecto-gimnasio/services"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,7 +31,7 @@ func Login(c *gin.Context) {
 	}
 
 	// ✅ Generar token
-	token, err := services.GenerateToken(user.Username, user.Role)
+	token, err := services.GenerateToken(user.ID, user.Username, user.Role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo generar el token"})
 		return
