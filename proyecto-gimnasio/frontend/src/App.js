@@ -1,26 +1,32 @@
-import { useEffect, useState } from "react";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './pages/Login';
+import AdminDashboard from './pages/AdminDashboard';
+import Home from './pages/Home';
+import ActivityDetail from './pages/ActivityDetail';
+import MyActivities from './pages/MyActivities';
+import Navbar from './components/Navbar';
+
 
 function App() {
-  const [activities, setActivities] = useState([]);
-
-  useEffect(() => {
-    fetch("http://localhost:8080/activities")
-      .then((res) => res.json())
-      .then((data) => setActivities(data))
-      .catch((err) => console.error("Error al obtener actividades:", err));
-  }, []);
+  const token = localStorage.getItem('token');
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Actividades disponibles</h1>
-      <ul>
-        {activities.map((activity) => (
-          <li key={activity.ID}>
-            <strong>{activity.name}</strong> - {activity.day} - {activity.hour}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Router>
+      <Navbar />
+      {/* Aquí puedes agregar un componente de Header o Footer si lo deseas */}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/admin"
+          element={token ? <AdminDashboard /> : <Navigate to="/login" />}
+        />
+        <Route path="/activities/:id" element={<ActivityDetail />} />
+        <Route path="/mis-actividades" element={<MyActivities />} />
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
+    </Router>
   );
 }
 
