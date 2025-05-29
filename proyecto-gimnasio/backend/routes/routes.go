@@ -21,5 +21,9 @@ func SetupRoutes(router *gin.Engine) {
 	router.GET("/users/:user_id/activities", controllers.GetUserActivities)
 	admin.PUT("/activities/:id", controllers.UpdateActivity)
 	admin.DELETE("/activities/:id", controllers.DeleteActivity)
+    router.GET("/categories", controllers.ListCategories)
+    router.POST("/categories", controllers.CreateCategory)
+    router.PUT("/categories/:id", controllers.UpdateCategory)
+    router.DELETE("/categories/:id", controllers.DeleteCategory)
 
 }

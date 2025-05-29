@@ -9,6 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Login godoc
+// @Summary Iniciar sesión
+// @Tags Autenticación
+// @Accept json
+// @Produce json
+// @Param credentials body models.SwaggerUser true "Credenciales de usuario"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /login [post]
 func Login(c *gin.Context) {
 	var input models.User
 	if err := c.ShouldBindJSON(&input); err != nil {

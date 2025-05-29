@@ -9,9 +9,10 @@ const (
 	RoleSocio UserRole = "socio"
 )
 
+// swagger:model User
 type User struct {
 	gorm.Model
-	Username string   `json:"username" gorm:"unique"`
-	Password string   `json:"password"`
-	Role     UserRole `json:"role" gorm:"type:enum('admin','socio')"`
+	Username string    `json:"username" gorm:"unique"`
+	Password string    `json:"password"`
+	Role     UserRole  `json:"role"` // ← tipo tipado
 }

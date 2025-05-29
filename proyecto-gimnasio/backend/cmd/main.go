@@ -1,3 +1,15 @@
+// @title Proyecto Gimnasio API
+// @version 1.0
+// @description API para la gestión de un gimnasio.
+// @termsOfService http://swagger.io/terms/
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @host localhost:8080
+// @BasePath /
+
 package main
 
 import (
@@ -8,6 +20,11 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	"github.com/swaggo/gin-swagger"
+	swaggerFiles "github.com/swaggo/files"
+	_ "proyecto-gimnasio/docs"
+
 )
 
 func main() {
@@ -18,6 +35,7 @@ func main() {
 	// Crear instancia de router Gin
 	router := gin.Default()
 	router.Static("/images", "./uploads")
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:3001"},

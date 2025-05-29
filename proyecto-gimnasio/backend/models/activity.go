@@ -1,37 +1,32 @@
 package models
 
-import (
-	"time"
+import "gorm.io/gorm"
 
-	"gorm.io/gorm"
-)
-
-type Frequency string
-type WeekDay string
-
-const (
-	FrequencySemanal Frequency = "Semanal"
-	FrequencyMensual Frequency = "Mensual"
-	FrequencyUnica   Frequency = "Unica"
-
-	Monday    WeekDay = "Lunes"
-	Tuesday   WeekDay = "Martes"
-	Wednesday WeekDay = "Miércoles"
-	Thursday  WeekDay = "Jueves"
-	Friday    WeekDay = "Viernes"
-	Saturday  WeekDay = "Sábado"
-	Sunday    WeekDay = "Domingo"
-)
-
+// swagger:model Activity
 type Activity struct {
 	gorm.Model
-	Name       string    `json:"name"`
-	Day        WeekDay   `json:"day" gorm:"type:enum('Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo')"`
-	StartHour  time.Time `json:"start_hour"`
-	Duration   int       `json:"duration"` // minutos
-	Capacity   int       `json:"capacity"`
-	CategoryID uint      `json:"category_id"`
-	Category   Category  `gorm:"foreignKey:CategoryID"`
-	Frequency  Frequency `json:"frequency" gorm:"type:enum('Semanal','Mensual','Unica')"`
-	ImageURL   string    `json:"image_url"`
+	// Nombre de la actividad
+	// required: true
+	Name string `json:"name"`
+	// Día de la semana (Lunes a Domingo)
+	// required: true
+	Day string `json:"day"`
+	// Hora de inicio (HH:MM)
+	// required: true
+	StartHour string `json:"start_hour"`
+	// Duración en minutos
+	// required: true
+	Duration uint `json:"duration"`
+	// Cupo máximo
+	// required: true
+	Capacity int `json:"capacity"`
+	// ID de categoría relacionada
+	// required: true
+	CategoryID uint `json:"category_id"`
+	// Frecuencia: Semanal, Mensual o Única
+	// required: true
+	Frequency string `json:"frequency"`
+	// URL de imagen
+	// required: false
+	ImageURL string `json:"image_url"`
 }

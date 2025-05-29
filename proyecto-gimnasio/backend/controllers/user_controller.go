@@ -8,6 +8,16 @@ import (
     "github.com/gin-gonic/gin"
 )
 
+// RegisterUser godoc
+// @Summary Registrar nuevo usuario
+// @Tags Autenticación
+// @Accept json
+// @Produce json
+// @Param user body models.SwaggerUser true "Datos del usuario"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /register [post]
 func RegisterUser(c *gin.Context) {
     var user models.User
 
