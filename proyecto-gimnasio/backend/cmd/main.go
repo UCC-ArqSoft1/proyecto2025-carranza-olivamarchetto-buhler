@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"proyecto-gimnasio/config"
 	"proyecto-gimnasio/routes"
+	"proyecto-gimnasio/seed"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -11,10 +12,12 @@ import (
 
 func main() {
 	db := config.ConnectDB()
+	seed.SeedAdminUser()
 	fmt.Println("Base de datos conectada:", db)
 
 	// Crear instancia de router Gin
 	router := gin.Default()
+	router.Static("/images", "./uploads")
 
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:3001"},
