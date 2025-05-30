@@ -1,5 +1,7 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+"use client"
+
+import { useState, useEffect } from "react"
+import { useNavigate, useLocation, Link } from "react-router-dom"
 import {
   Container,
   Card,
@@ -10,18 +12,39 @@ import {
   Box,
   Avatar,
   CircularProgress,
+  Alert,
+  Divider,
 } from "@mui/material"
 import { Login as LoginIcon, Person, Lock } from "@mui/icons-material"
 import { toast } from "react-toastify"
-import { useAuthStore } from "../services/auth-store"
 import API from "../services/api"
+import { useAuthStore } from "../services/auth-store"
 
 export default function Login() {
   const navigate = useNavigate()
-  const login = useAuthStore((state) => state.login)
+  const location = useLocation()
+  const { login, isAuthenticated, user } = useAuthStore()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+
+  // Get message and username from register redirect
+  const registerMessage = location.state?.message
+  const suggestedUsername = location.state?.username
+
+  useEffect(() => {
+    if (suggestedUsername) {
+      setUsername(suggestedUsername)
+    }
+  }, [suggestedUsername])
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const from = location.state?.from?.pathname || (user.role === "admin" ? "/admin" : "/")
+      navigate(from, { replace: true })
+    }
+  }, [isAuthenticated, user, navigate, location])
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -29,27 +52,28 @@ export default function Login() {
 
     try {
       const res = await API.post("/login", { username, password })
-      
-      if (login(res.data.token)) {
+      const success = login(res.data.token)
+
+      if (success) {
         toast.success("¡Bienvenido! Has iniciado sesión correctamente")
-        
+
         // Get user role from store after login
-        const { user } = useAuthStore.getState()
-        
-        // Redirect based on role
-        if (user?.role === "admin") {
-          navigate("/admin")
-        } else {
-          navigate("/")
-        }
+        const { user: loggedUser } = useAuthStore.getState()
+        const from = location.state?.from?.pathname || (loggedUser?.role === "admin" ? "/admin" : "/")
+        navigate(from, { replace: true })
       } else {
-        toast.error("Token inválido")
+        toast.error("Token inválido o expirado")
       }
     } catch (err) {
       toast.error("Usuario o contraseña incorrectos")
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Don't render login form if already authenticated
+  if (isAuthenticated) {
+    return null
   }
 
   return (
@@ -75,6 +99,12 @@ export default function Login() {
                 Ingresa tus credenciales para acceder al sistema
               </Typography>
             </Box>
+
+            {registerMessage && (
+              <Alert severity="success" sx={{ mb: 3 }}>
+                {registerMessage}
+              </Alert>
+            )}
 
             <Box component="form" onSubmit={handleLogin} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
               <TextField
@@ -112,6 +142,22 @@ export default function Login() {
               >
                 {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
               </Button>
+
+              <Divider sx={{ my: 2 }} />
+
+              <Box sx={{ textAlign: "center" }}>
+                <Typography variant="body2" color="text.secondary">
+                  ¿No tienes una cuenta?{" "}
+                  <Button
+                    component={Link}
+                    to="/register"
+                    variant="text"
+                    sx={{ textTransform: "none", p: 0, minWidth: "auto" }}
+                  >
+                    Regístrate aquí
+                  </Button>
+                </Typography>
+              </Box>
             </Box>
           </CardContent>
         </Card>

@@ -12,6 +12,7 @@ import ActivityDetail from "./pages/ActivityDetail.jsx"
 import MyActivities from "./pages/MyActivities.jsx"
 import Navbar from "./components/Navbar.jsx"
 import CategoriesManagement from "./pages/CategoriesManagement.jsx"
+import Register from "./pages/Register.jsx"
 
 const theme = createTheme({
   palette: {
@@ -44,6 +45,7 @@ function App() {
             <Route path="/admin/categories" element={isAuthenticated ? <CategoriesManagement /> : <Navigate to="/login" />} />
             <Route path="/activities/:id" element={<ActivityDetail />} />
             <Route path="/mis-actividades" element={<MyActivities />} />
+            <Route path="/register" element={<Register />} />
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
         </main>
