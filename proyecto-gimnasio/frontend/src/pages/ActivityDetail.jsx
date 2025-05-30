@@ -146,10 +146,10 @@ export default function ActivityDetail() {
                 Detalles de la actividad deportiva
               </Typography>
             </Box>
-            <Chip label={String(activity.category || "")} color="primary" size="large" />
+            <Chip label={String(activity.category.name || "")} color="primary" size="large" />
           </Box>
 
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ my: 3 }} />  
 
           <Box sx={{ display: "grid", gap: 3, gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" } }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>

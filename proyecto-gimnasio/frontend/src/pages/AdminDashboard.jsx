@@ -121,7 +121,7 @@ export default function AdminDashboard() {
                     <Typography variant="h6" component="h2" gutterBottom>
                       {String(activity.name || "")}
                     </Typography>
-                    <Chip label={String(activity.category || "")} color="primary" size="small" />
+                    <Chip label={String(activity.category.name || "")} color="primary" size="small" />
                   </Box>
 
                   <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
