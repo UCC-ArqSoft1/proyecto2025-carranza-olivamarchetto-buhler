@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import {
   Container,
@@ -17,12 +15,11 @@ import {
   DialogContent,
   CircularProgress,
 } from "@mui/material"
-import { Add, Edit, Delete, CalendarToday, Schedule, People, Close } from "@mui/icons-material"
+import { Add, Edit, Delete, CalendarToday, Schedule, People, Close, Category } from "@mui/icons-material"
 import { toast } from "react-toastify"
-import ActivityForm from "../components/ActivityForm"
-import API from "../services/api"
 import { Link } from "react-router-dom"
-import { Category } from "@mui/icons-material"
+import ActivityForm from "../components/ActivityForm.jsx"
+import API from "../services/api"
 
 export default function AdminDashboard() {
   const [activities, setActivities] = useState([])
@@ -137,7 +134,7 @@ export default function AdminDashboard() {
                   <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                     <Schedule sx={{ mr: 1, fontSize: 18, color: "text.secondary" }} />
                     <Typography variant="body2" color="text.secondary">
-                      {String(activity.hour || "")} hs
+                      {String(activity.start_hour || activity.hour || "")} hs
                     </Typography>
                   </Box>
 

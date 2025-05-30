@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import {
@@ -14,12 +12,13 @@ import {
   CircularProgress,
 } from "@mui/material"
 import { Login as LoginIcon, Person, Lock } from "@mui/icons-material"
-import { jwtDecode } from "jwt-decode"
 import { toast } from "react-toastify"
+import { useAuthStore } from "../services/auth-store"
 import API from "../services/api"
 
 export default function Login() {
   const navigate = useNavigate()
+  const login = useAuthStore((state) => state.login)
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -30,18 +29,21 @@ export default function Login() {
 
     try {
       const res = await API.post("/login", { username, password })
-      localStorage.setItem("token", res.data.token)
-
-      const decoded = jwtDecode(res.data.token)
-      localStorage.setItem("user_id", decoded.user_id)
-
-      toast.success("¡Bienvenido! Has iniciado sesión correctamente")
-
-      // Redirect based on role
-      if (decoded.role === "admin") {
-        navigate("/admin")
+      
+      if (login(res.data.token)) {
+        toast.success("¡Bienvenido! Has iniciado sesión correctamente")
+        
+        // Get user role from store after login
+        const { user } = useAuthStore.getState()
+        
+        // Redirect based on role
+        if (user?.role === "admin") {
+          navigate("/admin")
+        } else {
+          navigate("/")
+        }
       } else {
-        navigate("/")
+        toast.error("Token inválido")
       }
     } catch (err) {
       toast.error("Usuario o contraseña incorrectos")

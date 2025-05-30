@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import {
@@ -16,16 +14,19 @@ import {
   CircularProgress,
 } from "@mui/material"
 import { CalendarToday, Schedule, People, FitnessCenter, Warning } from "@mui/icons-material"
+import { useAuthStore } from "../services/auth-store"
 import API from "../services/api"
 
 export default function MyActivities() {
+  const { user, isAuthenticated } = useAuthStore()
   const [activities, setActivities] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const userID = localStorage.getItem("user_id")
 
   const load = async () => {
+    if (!user?.id) return
+    
     try {
-      const res = await API.get(`/users/${userID}/activities`)
+      const res = await API.get(`/users/${user.id}/activities`)
       setActivities(res.data || [])
     } catch (err) {
       console.error("Error al obtener actividades del usuario", err)
@@ -35,10 +36,14 @@ export default function MyActivities() {
   }
 
   useEffect(() => {
-    if (userID) load()
-  }, [userID])
+    if (isAuthenticated && user?.id) {
+      load()
+    } else {
+      setIsLoading(false)
+    }
+  }, [isAuthenticated, user?.id])
 
-  if (!userID) {
+  if (!isAuthenticated) {
     return (
       <Container maxWidth="md">
         <Box textAlign="center" py={6}>
@@ -113,7 +118,7 @@ export default function MyActivities() {
                   <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                     <Schedule sx={{ mr: 1, fontSize: 18, color: "text.secondary" }} />
                     <Typography variant="body2" color="text.secondary">
-                      {String(activity.hour || "")} hs
+                      {String(activity.start_hour || activity.hour || "")} hs
                     </Typography>
                   </Box>
 

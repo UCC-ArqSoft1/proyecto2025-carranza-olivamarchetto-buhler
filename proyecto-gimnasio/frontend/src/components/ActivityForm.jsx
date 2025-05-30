@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import {
   Card,
@@ -55,7 +53,7 @@ export default function ActivityForm({ activity, onSuccess }) {
       setForm({
         name: String(activity.name || ""),
         day: String(activity.day || ""),
-        start_hour: String(activity.start_hour || activity.hour || ""), // Handle both field names
+        start_hour: String(activity.start_hour || activity.hour || ""),
         capacity: String(activity.capacity || ""),
         category_id: String(activity.category_id || ""),
         duration: String(activity.duration || ""),
@@ -79,7 +77,6 @@ export default function ActivityForm({ activity, onSuccess }) {
     e.preventDefault()
     setIsLoading(true)
 
-    // Prepare the data according to API specification
     const apiData = {
       name: form.name,
       day: form.day,

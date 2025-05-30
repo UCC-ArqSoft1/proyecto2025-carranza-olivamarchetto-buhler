@@ -1,15 +1,17 @@
+import { useEffect } from "react"
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
-import Login from "./pages/Login"
-import AdminDashboard from "./pages/AdminDashboard"
-import Home from "./pages/Home"
-import ActivityDetail from "./pages/ActivityDetail"
-import MyActivities from "./pages/MyActivities"
-import Navbar from "./components/Navbar"
-import CategoriesManagement from "./pages/CategoriesManagement"
+import { useAuthStore } from "./services/auth-store"
+import Login from "./pages/Login.jsx"
+import AdminDashboard from "./pages/AdminDashboard.jsx"
+import Home from "./pages/Home.jsx"
+import ActivityDetail from "./pages/ActivityDetail.jsx"
+import MyActivities from "./pages/MyActivities.jsx"
+import Navbar from "./components/Navbar.jsx"
+import CategoriesManagement from "./pages/CategoriesManagement.jsx"
 
 const theme = createTheme({
   palette: {
@@ -23,7 +25,11 @@ const theme = createTheme({
 })
 
 function App() {
-  const token = localStorage.getItem("token")
+  const { isAuthenticated, checkAuth } = useAuthStore()
+
+  useEffect(() => {
+    checkAuth()
+  }, [checkAuth])
 
   return (
     <ThemeProvider theme={theme}>
@@ -34,8 +40,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/admin" element={token ? <AdminDashboard /> : <Navigate to="/login" />} />
-            <Route path="/admin/categories" element={token ? <CategoriesManagement /> : <Navigate to="/login" />} />
+            <Route path="/admin" element={isAuthenticated ? <AdminDashboard /> : <Navigate to="/login" />} />
+            <Route path="/admin/categories" element={isAuthenticated ? <CategoriesManagement /> : <Navigate to="/login" />} />
             <Route path="/activities/:id" element={<ActivityDetail />} />
             <Route path="/mis-actividades" element={<MyActivities />} />
             <Route path="*" element={<Navigate to="/login" />} />

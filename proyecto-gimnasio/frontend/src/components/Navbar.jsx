@@ -1,30 +1,17 @@
-"use client"
-
 import { useState } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
-import { jwtDecode } from "jwt-decode"
 import { AppBar, Toolbar, Typography, Button, Box, IconButton, Menu, MenuItem } from "@mui/material"
 import { Home, Person, Settings, Logout, FitnessCenter, MoreVert, Category } from "@mui/icons-material"
+import { useAuthStore } from "../services/auth-store"
 
 export default function Navbar() {
-  const token = localStorage.getItem("token")
+  const { isAuthenticated, user, logout } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
   const [anchorEl, setAnchorEl] = useState(null)
 
-  let role = null
-  if (token) {
-    try {
-      const decoded = jwtDecode(token)
-      role = decoded.role
-    } catch {
-      role = null
-    }
-  }
-
   const handleLogout = () => {
-    localStorage.removeItem("token")
-    localStorage.removeItem("user_id")
+    logout()
     navigate("/")
     setAnchorEl(null)
   }
@@ -52,7 +39,7 @@ export default function Navbar() {
             Inicio
           </Button>
 
-          {token && role === "socio" && (
+          {isAuthenticated && user?.role === "socio" && (
             <Button
               color="inherit"
               component={Link}
@@ -64,7 +51,7 @@ export default function Navbar() {
             </Button>
           )}
 
-          {token && role === "admin" && (
+          {isAuthenticated && user?.role === "admin" && (
             <>
               <Button
                 color="inherit"
@@ -87,7 +74,7 @@ export default function Navbar() {
             </>
           )}
 
-          {token ? (
+          {isAuthenticated ? (
             <Button color="inherit" onClick={handleLogout} startIcon={<Logout />}>
               Cerrar sesión
             </Button>
@@ -106,12 +93,12 @@ export default function Navbar() {
             <MenuItem component={Link} to="/" onClick={handleMenuClose}>
               <Home sx={{ mr: 1 }} /> Inicio
             </MenuItem>
-            {token && role === "socio" && (
+            {isAuthenticated && user?.role === "socio" && (
               <MenuItem component={Link} to="/mis-actividades" onClick={handleMenuClose}>
                 <Person sx={{ mr: 1 }} /> Mis actividades
               </MenuItem>
             )}
-            {token && role === "admin" && (
+            {isAuthenticated && user?.role === "admin" && (
               <>
                 <MenuItem component={Link} to="/admin" onClick={handleMenuClose}>
                   <Settings sx={{ mr: 1 }} /> Actividades
@@ -121,7 +108,7 @@ export default function Navbar() {
                 </MenuItem>
               </>
             )}
-            {token ? (
+            {isAuthenticated ? (
               <MenuItem onClick={handleLogout}>
                 <Logout sx={{ mr: 1 }} /> Cerrar sesión
               </MenuItem>

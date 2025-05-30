@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import {
@@ -28,29 +26,18 @@ import {
   AccessTime,
   Repeat,
 } from "@mui/icons-material"
-import { jwtDecode } from "jwt-decode"
 import { toast } from "react-toastify"
+import { useAuthStore } from "../services/auth-store"
 import API from "../services/api"
 
 export default function ActivityDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { isAuthenticated, user } = useAuthStore()
   const [activity, setActivity] = useState(null)
   const [message, setMessage] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [isEnrolling, setIsEnrolling] = useState(false)
-
-  const token = localStorage.getItem("token")
-  let userRole = null
-
-  if (token) {
-    try {
-      const decoded = jwtDecode(token)
-      userRole = decoded.role
-    } catch {
-      userRole = null
-    }
-  }
 
   const loadActivity = async () => {
     try {
@@ -65,8 +52,7 @@ export default function ActivityDetail() {
   }
 
   const handleEnroll = async () => {
-    const userID = Number.parseInt(localStorage.getItem("user_id"))
-    if (!userID) {
+    if (!user?.id) {
       toast.error("Debes estar logueado como socio para inscribirte")
       return
     }
@@ -74,7 +60,7 @@ export default function ActivityDetail() {
     setIsEnrolling(true)
     try {
       await API.post("/activities/enroll", {
-        user_id: userID,
+        user_id: user.id,
         activity_id: activity.ID,
       })
       setMessage("success")
@@ -234,7 +220,7 @@ export default function ActivityDetail() {
           )}
 
           <Box sx={{ display: "flex", gap: 2, mt: 4 }}>
-            {token && userRole === "socio" && (
+            {isAuthenticated && user?.role === "socio" && (
               <Button
                 variant="contained"
                 size="large"
@@ -247,7 +233,7 @@ export default function ActivityDetail() {
               </Button>
             )}
 
-            {token && userRole === "admin" && (
+            {isAuthenticated && user?.role === "admin" && (
               <>
                 <Button variant="outlined" startIcon={<Edit />} onClick={() => navigate(`/admin/edit/${id}`)}>
                   Editar
