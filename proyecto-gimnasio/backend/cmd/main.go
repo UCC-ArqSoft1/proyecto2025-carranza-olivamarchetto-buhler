@@ -24,10 +24,15 @@ import (
 	"github.com/swaggo/gin-swagger"
 	swaggerFiles "github.com/swaggo/files"
 	_ "proyecto-gimnasio/docs"
-
+	"github.com/joho/godotenv"
+	"log"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	db := config.ConnectDB()
 	seed.SeedAdminUser()
 	fmt.Println("Base de datos conectada:", db)
@@ -49,7 +54,7 @@ func main() {
 	routes.SetupRoutes(router)
 
 	// Iniciar servidor en el puerto 8080
-	err := router.Run(":8080")
+	err = router.Run(":8080")
 	if err != nil {
 		fmt.Println("Error al iniciar el servidor:", err)
 	}

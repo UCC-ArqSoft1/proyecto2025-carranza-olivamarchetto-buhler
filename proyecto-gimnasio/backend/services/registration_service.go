@@ -41,6 +41,7 @@ func GetActivitiesByUser(userID string) ([]models.Activity, error) {
 
 	result := db.Joins("JOIN registrations ON registrations.activity_id = activities.id").
 		Where("registrations.user_id = ?", userID).
+		Preload("Category").
 		Find(&activities)
 
 	return activities, result.Error

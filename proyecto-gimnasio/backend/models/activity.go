@@ -23,6 +23,8 @@ type Activity struct {
 	// ID de categoría relacionada
 	// required: true
 	CategoryID uint `json:"category_id"`
+	// Relación con la categoría
+	Category Category `json:"category" gorm:"foreignKey:CategoryID"`
 	// Frecuencia: Semanal, Mensual o Única
 	// required: true
 	Frequency string `json:"frequency"`

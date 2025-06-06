@@ -11,4 +11,5 @@ type Registration struct {
 	// ID de la actividad
 	// required: true
 	ActivityID uint `json:"activity_id"`
+	
 }
