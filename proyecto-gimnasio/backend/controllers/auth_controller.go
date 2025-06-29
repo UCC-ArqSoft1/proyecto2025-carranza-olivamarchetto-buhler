@@ -2,12 +2,24 @@ package controllers
 
 import (
 	"net/http"
-	"proyecto-gimnasio/services"
-	"proyecto-gimnasio/models"
 	"proyecto-gimnasio/config"
+	"proyecto-gimnasio/models"
+	"proyecto-gimnasio/services"
+
 	"github.com/gin-gonic/gin"
 )
 
+// Login godoc
+// @Summary Iniciar sesión
+// @Tags Autenticación
+// @Accept json
+// @Produce json
+// @Param credentials body models.SwaggerUser true "Credenciales de usuario"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /login [post]
 func Login(c *gin.Context) {
 	var input models.User
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -30,7 +42,7 @@ func Login(c *gin.Context) {
 	}
 
 	// ✅ Generar token
-	token, err := services.GenerateToken(user.Username, user.Role)
+	token, err := services.GenerateToken(user.ID, user.Username, string(user.Role)) // ✅
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo generar el token"})
 		return

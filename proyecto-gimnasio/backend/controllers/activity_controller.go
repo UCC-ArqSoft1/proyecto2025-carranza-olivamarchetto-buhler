@@ -1,3 +1,5 @@
+
+
 package controllers
 
 import (
@@ -8,6 +10,16 @@ import (
     "github.com/gin-gonic/gin"
 )
 
+// CreateActivity godoc
+// @Summary Crear una nueva actividad
+// @Tags Actividades
+// @Accept json
+// @Produce json
+// @Param activity body models.SwaggerActivity true "Datos de la actividad"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /admin/activities [post]
 func CreateActivity(c *gin.Context) {
     var activity models.Activity
 
@@ -25,6 +37,13 @@ func CreateActivity(c *gin.Context) {
     c.JSON(http.StatusCreated, gin.H{"message": "Actividad creada correctamente"})
 }
 
+// ListActivities godoc
+// @Summary Listar todas las actividades
+// @Tags Actividades
+// @Produce json
+// @Success 200 {array} models.SwaggerActivity
+// @Failure 500 {object} map[string]string
+// @Router /activities [get]
 func ListActivities(c *gin.Context) {
     activities, err := services.GetAllActivities()
     if err != nil {
@@ -35,6 +54,14 @@ func ListActivities(c *gin.Context) {
     c.JSON(http.StatusOK, activities)
 }
 
+// GetActivityByID godoc
+// @Summary Obtener una actividad por ID
+// @Tags Actividades
+// @Produce json
+// @Param id path int true "ID de la actividad"
+// @Success 200 {object} models.SwaggerActivity
+// @Failure 404 {object} map[string]string
+// @Router /activities/{id} [get]
 func GetActivityByID(c *gin.Context) {
     id := c.Param("id")
     activity, err := services.GetActivityByID(id)
@@ -44,6 +71,18 @@ func GetActivityByID(c *gin.Context) {
     }
     c.JSON(http.StatusOK, activity)
 }
+
+// UpdateActivity godoc
+// @Summary Actualizar una actividad existente
+// @Tags Actividades
+// @Accept json
+// @Produce json
+// @Param id path int true "ID de la actividad"
+// @Param activity body models.SwaggerActivity true "Datos actualizados"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /admin/activities/{id} [put]
 func UpdateActivity(c *gin.Context) {
     id := c.Param("id")
     var updatedData models.Activity
@@ -62,6 +101,14 @@ func UpdateActivity(c *gin.Context) {
     c.JSON(http.StatusOK, gin.H{"message": "Actividad actualizada con éxito"})
 }
 
+// DeleteActivity godoc
+// @Summary Eliminar una actividad
+// @Tags Actividades
+// @Produce json
+// @Param id path int true "ID de la actividad"
+// @Success 200 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /admin/activities/{id} [delete]
 func DeleteActivity(c *gin.Context) {
     id := c.Param("id")
 

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: mysql:8.0
@@ -11,6 +9,11 @@ services:
       - "3307:3306"
     volumes:
       - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
@@ -20,13 +23,16 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       DB_HOST: db
       DB_USER: root
       DB_PASSWORD: password
       DB_NAME: gimnasio
       JWT_SECRET: secreto
+    # opcional: reiniciar si falla al inicio
+    restart: on-failure
 
   frontend:
     image: node:20-alpine
@@ -35,7 +41,7 @@ services:
     volumes:
       - ./frontend:/app
     ports:
-      - "3000:3000"
+      - "3000:3001"
     command: sh -c "npm install && npm start -- --host 0.0.0.0"
     depends_on:
       - backend
