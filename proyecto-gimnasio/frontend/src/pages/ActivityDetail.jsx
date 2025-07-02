@@ -61,7 +61,7 @@ export default function ActivityDetail() {
     try {
       await API.post("/activities/enroll", {
         user_id: user.id,
-        activity_id: activity.ID,
+        activity_id: activity.id,
       })
       setMessage("success")
       toast.success("Te has inscrito correctamente a la actividad")

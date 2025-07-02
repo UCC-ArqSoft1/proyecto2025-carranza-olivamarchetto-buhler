@@ -42,7 +42,7 @@ services:
       - ./frontend:/app
       - /app/node_modules
     ports:
-      - "3000:3000"
+      - "8081:3000"
     command: sh -c "npm install && npm start -- --host 0.0.0.0"
     depends_on:
       - backend

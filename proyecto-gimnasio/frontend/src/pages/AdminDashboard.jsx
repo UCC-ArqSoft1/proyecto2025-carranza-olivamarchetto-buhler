@@ -114,7 +114,7 @@ export default function AdminDashboard() {
       ) : (
         <Grid container spacing={3}>
           {activities.map((activity) => (
-            <Grid item xs={12} sm={6} md={4} key={activity.ID}>
+            <Grid item xs={12} sm={6} md={4} key={activity.id}>
               <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
@@ -159,7 +159,7 @@ export default function AdminDashboard() {
                     variant="contained"
                     color="error"
                     startIcon={<Delete />}
-                    onClick={() => deleteActivity(activity.ID)}
+                    onClick={() => deleteActivity(activity.id)}
                     disabled={showForm || editing}
                   >
                     Eliminar

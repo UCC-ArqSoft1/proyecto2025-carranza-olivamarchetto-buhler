@@ -100,7 +100,7 @@ export default function Home() {
 
       <Grid container spacing={3}>
         {filtered.map((activity) => (
-          <Grid item xs={12} sm={6} md={4} key={activity.ID}>
+          <Grid item xs={12} sm={6} md={4} key={activity.id}>
             <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
               {activity.image_url && (
                 <CardMedia
@@ -153,7 +153,7 @@ export default function Home() {
               <CardActions>
                 <Button
                   component={Link}
-                  to={`/activities/${activity.ID}`}
+                  to={`/activities/${activity.id}`}
                   variant="contained"
                   fullWidth
                   startIcon={<FitnessCenter />}

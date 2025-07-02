@@ -23,7 +23,7 @@ export default function ActivityForm({ activity, onSuccess }) {
     day: "",
     start_hour: "",
     capacity: "",
-    category_id: "",
+    category_id: 0,
     duration: "",
     frequency: "",
     image_url: "",
@@ -55,7 +55,7 @@ export default function ActivityForm({ activity, onSuccess }) {
         day: String(activity.day || ""),
         start_hour: String(activity.start_hour || activity.hour || ""),
         capacity: String(activity.capacity || ""),
-        category_id: String(activity.category_id || ""),
+        category_id: Number(activity.category_id) || 0,
         duration: String(activity.duration || ""),
         frequency: String(activity.frequency || ""),
         image_url: String(activity.image_url || ""),
@@ -67,8 +67,10 @@ export default function ActivityForm({ activity, onSuccess }) {
     setForm({
       ...form,
       [name]:
-        name === "capacity" || name === "category_id" || name === "duration"
+        name === "capacity" || name === "duration"
           ? Number.parseInt(String(value)) || 0
+          : name === "category_id"
+          ? Number(value) || 0
           : String(value),
     })
   }
@@ -77,20 +79,46 @@ export default function ActivityForm({ activity, onSuccess }) {
     e.preventDefault()
     setIsLoading(true)
 
+    // Validaciones del lado del cliente
+    const categoryId = Number.parseInt(form.category_id) || 0
+    if (categoryId <= 0) {
+      toast.error("Debe seleccionar una categoría")
+      setIsLoading(false)
+      return
+    }
+
+    const capacity = Number.parseInt(form.capacity) || 0
+    if (capacity <= 0) {
+      toast.error("La capacidad debe ser mayor a 0")
+      setIsLoading(false)
+      return
+    }
+
+    const duration = Number.parseInt(form.duration) || 0
+    if (duration <= 0) {
+      toast.error("La duración debe ser mayor a 0")
+      setIsLoading(false)
+      return
+    }
+
     const apiData = {
-      name: form.name,
+      name: form.name.trim(),
       day: form.day,
       start_hour: form.start_hour,
-      capacity: Number.parseInt(form.capacity) || 0,
-      category_id: Number.parseInt(form.category_id) || 0,
-      duration: Number.parseInt(form.duration) || 0,
+      capacity: capacity,
+      category_id: categoryId,
+      duration: duration,
       frequency: form.frequency,
-      image_url: form.image_url,
+    }
+
+    // Solo agregar image_url si no está vacío
+    if (form.image_url && form.image_url.trim()) {
+      apiData.image_url = form.image_url.trim()
     }
 
     try {
       if (activity) {
-        await API.put(`/admin/activities/${activity.ID}`, apiData)
+        await API.put(`/admin/activities/${activity.id}`, apiData)
         toast.success("Actividad actualizada correctamente")
       } else {
         await API.post("/admin/activities", apiData)
@@ -103,7 +131,7 @@ export default function ActivityForm({ activity, onSuccess }) {
           day: "",
           start_hour: "",
           capacity: "",
-          category_id: "",
+          category_id: 0,
           duration: "",
           frequency: "",
           image_url: "",
@@ -117,8 +145,8 @@ export default function ActivityForm({ activity, onSuccess }) {
     }
   }
 
-  const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
-  const frequencies = ["Semanal", "Quincenal", "Mensual"]
+  const days = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
+  const frequencies = ["Semanal", "Mensual", "Unica"]
 
   return (
     <Card sx={{ maxWidth: 500, mx: "auto" }}>
@@ -193,7 +221,7 @@ export default function ActivityForm({ activity, onSuccess }) {
               disabled={loadingCategories}
             >
               {categories.map((category) => (
-                <MenuItem key={category.ID} value={category.ID}>
+                <MenuItem key={category.id} value={category.id}>
                   {category.name}
                 </MenuItem>
               ))}

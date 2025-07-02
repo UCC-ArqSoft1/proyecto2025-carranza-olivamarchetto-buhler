@@ -67,7 +67,7 @@ export default function CategoriesManagement() {
     setIsSubmitting(true)
     try {
       if (editing) {
-        await API.put(`/categories/${editing.ID}`, formData)
+        await API.put(`/categories/${editing.id}`, formData)
         toast.success("Categoría actualizada correctamente")
       } else {
         await API.post("/categories", formData)
@@ -87,7 +87,7 @@ export default function CategoriesManagement() {
     if (!window.confirm(`¿Estás seguro de que quieres eliminar la categoría "${category.name}"?`)) return
 
     try {
-      await API.delete(`/categories/${category.ID}`)
+      await API.delete(`/categories/${category.id}`)
       toast.success("Categoría eliminada correctamente")
       loadCategories()
     } catch (err) {
@@ -140,7 +140,7 @@ export default function CategoriesManagement() {
       ) : (
         <Grid container spacing={3}>
           {categories.map((category) => (
-            <Grid item xs={12} sm={6} md={4} key={category.ID}>
+            <Grid item xs={12} sm={6} md={4} key={category.id}>
               <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -150,7 +150,7 @@ export default function CategoriesManagement() {
                     </Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary">
-                    ID: {category.ID}
+                    id: {category.id}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Creada: {new Date(category.CreatedAt).toLocaleDateString()}
