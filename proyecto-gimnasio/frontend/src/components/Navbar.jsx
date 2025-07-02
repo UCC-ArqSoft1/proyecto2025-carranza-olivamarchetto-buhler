@@ -13,6 +13,7 @@ import {
   Category,
   Login,
   PersonAdd,
+  AccountCircle,
 } from "@mui/icons-material"
 import { toast } from "react-toastify"
 import { useAuthStore } from "../services/auth-store"
@@ -88,6 +89,16 @@ export default function Navbar() {
                 </>
               )}
 
+              <Button
+                color="inherit"
+                component={Link}
+                to="/profile"
+                startIcon={<AccountCircle />}
+                variant={location.pathname === "/profile" ? "outlined" : "text"}
+              >
+                Mi Perfil
+              </Button>
+
               <Button color="inherit" onClick={handleLogout} startIcon={<Logout />}>
                 Cerrar sesión
               </Button>
@@ -116,6 +127,9 @@ export default function Navbar() {
                     </MenuItem>
                   </>
                 )}
+                <MenuItem component={Link} to="/profile" onClick={handleMenuClose}>
+                  <AccountCircle sx={{ mr: 1 }} /> Mi Perfil
+                </MenuItem>
                 <MenuItem onClick={handleLogout}>
                   <Logout sx={{ mr: 1 }} /> Cerrar sesión
                 </MenuItem>

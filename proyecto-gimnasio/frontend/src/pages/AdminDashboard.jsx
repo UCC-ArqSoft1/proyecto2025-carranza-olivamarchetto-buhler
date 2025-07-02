@@ -93,9 +93,12 @@ export default function AdminDashboard() {
             Gestiona las actividades del gimnasio
           </Typography>
         </Box>
-        <Box sx={{ display: "flex", gap: 2 }}>
+        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
           <Button component={Link} to="/admin/stats" variant="contained" startIcon={<Assessment />}>
             Ver Estadísticas
+          </Button>
+          <Button component={Link} to="/admin/users" variant="outlined" startIcon={<People />}>
+            Gestionar Usuarios
           </Button>
           <Button component={Link} to="/admin/categories" variant="outlined" startIcon={<Category />}>
             Gestionar Categorías

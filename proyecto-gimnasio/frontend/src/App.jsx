@@ -8,6 +8,8 @@ import { useAuthStore } from "./services/auth-store"
 import Login from "./pages/Login.jsx"
 import AdminDashboard from "./pages/AdminDashboard.jsx"
 import AdminStats from "./pages/AdminStats.jsx"
+import UserManagement from "./pages/UserManagement.jsx"
+import UserProfile from "./pages/UserProfile.jsx"
 import Home from "./pages/Home.jsx"
 import ActivityDetail from "./pages/ActivityDetail.jsx"
 import MyActivities from "./pages/MyActivities.jsx"
@@ -44,7 +46,9 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={isAuthenticated ? <AdminDashboard /> : <Navigate to="/login" />} />
             <Route path="/admin/stats" element={isAuthenticated ? <AdminStats /> : <Navigate to="/login" />} />
+            <Route path="/admin/users" element={isAuthenticated ? <UserManagement /> : <Navigate to="/login" />} />
             <Route path="/admin/categories" element={isAuthenticated ? <CategoriesManagement /> : <Navigate to="/login" />} />
+            <Route path="/profile" element={isAuthenticated ? <UserProfile /> : <Navigate to="/login" />} />
             <Route path="/activities/:id" element={<ActivityDetail />} />
             <Route path="/mis-actividades" element={<MyActivities />} />
             <Route path="/register" element={<Register />} />
