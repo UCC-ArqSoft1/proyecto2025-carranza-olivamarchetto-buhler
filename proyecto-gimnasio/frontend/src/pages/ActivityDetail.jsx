@@ -25,6 +25,7 @@ import {
   FitnessCenter,
   AccessTime,
   Repeat,
+  PersonRemove,
 } from "@mui/icons-material"
 import { toast } from "react-toastify"
 import { useAuthStore } from "../services/auth-store"
@@ -38,6 +39,9 @@ export default function ActivityDetail() {
   const [message, setMessage] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [isEnrolling, setIsEnrolling] = useState(false)
+  const [isUnenrolling, setIsUnenrolling] = useState(false)
+  const [isEnrolled, setIsEnrolled] = useState(false)
+  const [checkingEnrollment, setCheckingEnrollment] = useState(false)
 
   const loadActivity = async () => {
     try {
@@ -51,6 +55,23 @@ export default function ActivityDetail() {
     }
   }
 
+  const checkEnrollmentStatus = async () => {
+    if (!user?.id || !isAuthenticated) return
+    
+    setCheckingEnrollment(true)
+    try {
+      const res = await API.get(`/users/${user.id}/activities`)
+      const userActivities = res.data || []
+      const enrolled = userActivities.some(act => act.id === parseInt(id))
+      setIsEnrolled(enrolled)
+    } catch (err) {
+      console.error("Error checking enrollment status:", err)
+      // No mostrar error toast aquí para no interrumpir la experiencia del usuario
+    } finally {
+      setCheckingEnrollment(false)
+    }
+  }
+
   const handleEnroll = async () => {
     if (!user?.id) {
       toast.error("Debes estar logueado como socio para inscribirte")
@@ -60,16 +81,32 @@ export default function ActivityDetail() {
     setIsEnrolling(true)
     try {
       await API.post("/activities/enroll", {
-        user_id: user.id,
-        activity_id: activity.id,
+        activity_id: parseInt(id),
       })
+      setIsEnrolled(true)
       setMessage("success")
       toast.success("Te has inscrito correctamente a la actividad")
     } catch (err) {
       setMessage("error")
-      toast.error("No se pudo completar la inscripción")
+      toast.error(err.response?.data?.error || "No se pudo completar la inscripción")
     } finally {
       setIsEnrolling(false)
+    }
+  }
+
+  const handleUnenroll = async () => {
+    if (!window.confirm("¿Estás seguro que deseas desinscribirte de esta actividad?")) return
+
+    setIsUnenrolling(true)
+    try {
+      await API.delete(`/activities/${id}/unenroll`)
+      setIsEnrolled(false)
+      toast.success("Te has desinscrito exitosamente de la actividad")
+    } catch (err) {
+      console.error("Error al desinscribirse:", err)
+      toast.error(err.response?.data?.error || "Error al desinscribirse de la actividad")
+    } finally {
+      setIsUnenrolling(false)
     }
   }
 
@@ -88,6 +125,12 @@ export default function ActivityDetail() {
   useEffect(() => {
     loadActivity()
   }, [id])
+
+  useEffect(() => {
+    if (isAuthenticated && user?.id && user?.role === "socio") {
+      checkEnrollmentStatus()
+    }
+  }, [isAuthenticated, user?.id, user?.role, id])
 
   if (isLoading) {
     return (
@@ -207,6 +250,17 @@ export default function ActivityDetail() {
             )}
           </Box>
 
+          {/* Mostrar estado de inscripción */}
+          {isAuthenticated && user?.role === "socio" && !checkingEnrollment && isEnrolled && (
+            <Alert
+              severity="info"
+              icon={<CheckCircle />}
+              sx={{ mt: 3 }}
+            >
+              ¡Ya estás inscrito en esta actividad! Puedes desinscribirte si lo deseas.
+            </Alert>
+          )}
+
           {message && (
             <Alert
               severity={message === "success" ? "success" : "error"}
@@ -221,16 +275,42 @@ export default function ActivityDetail() {
 
           <Box sx={{ display: "flex", gap: 2, mt: 4 }}>
             {isAuthenticated && user?.role === "socio" && (
-              <Button
-                variant="contained"
-                size="large"
-                onClick={handleEnroll}
-                disabled={isEnrolling || message === "success"}
-                startIcon={isEnrolling ? <CircularProgress size={20} /> : <FitnessCenter />}
-                sx={{ flex: 1 }}
-              >
-                {isEnrolling ? "Inscribiendo..." : "Inscribirme"}
-              </Button>
+              <>
+                {checkingEnrollment ? (
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    disabled
+                    startIcon={<CircularProgress size={20} />}
+                    sx={{ flex: 1 }}
+                  >
+                    Verificando estado...
+                  </Button>
+                ) : isEnrolled ? (
+                  <Button
+                    variant="contained"
+                    color="error"
+                    size="large"
+                    onClick={handleUnenroll}
+                    disabled={isUnenrolling}
+                    startIcon={isUnenrolling ? <CircularProgress size={20} /> : <PersonRemove />}
+                    sx={{ flex: 1 }}
+                  >
+                    {isUnenrolling ? "Desinscribiéndose..." : "Desinscribirse"}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={handleEnroll}
+                    disabled={isEnrolling || message === "success"}
+                    startIcon={isEnrolling ? <CircularProgress size={20} /> : <FitnessCenter />}
+                    sx={{ flex: 1 }}
+                  >
+                    {isEnrolling ? "Inscribiendo..." : "Inscribirme"}
+                  </Button>
+                )}
+              </>
             )}
 
             {isAuthenticated && user?.role === "admin" && (
