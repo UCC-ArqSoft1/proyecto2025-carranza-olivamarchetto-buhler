@@ -2,119 +2,111 @@ package controllers
 
 import (
 	"net/http"
-	"proyecto-gimnasio/config"
-	"proyecto-gimnasio/models"
+	"strconv"
+
+	"proyecto-gimnasio/dto"
+	"proyecto-gimnasio/services"
 
 	"github.com/gin-gonic/gin"
 )
 
 // ListCategories godoc
-// @Summary Listar todas las categorías
-// @Tags Categorías
-// @Produce json
-// @Success 200 {array} models.SwaggerCategory
-// @Failure 500 {object} map[string]string
-// @Router /categories [get]
+// @Summary      Listar todas las categorías
+// @Tags         Categorías
+// @Produce      json
+// @Success      200  {array}  dto.CategoryResponse
+// @Failure      500  {object}  map[string]string
+// @Router       /categories [get]
 func ListCategories(c *gin.Context) {
-	db := config.ConnectDB()
-	var categories []models.Category
-
-	if err := db.Find(&categories).Error; err != nil {
+	cats, err := services.GetAllCategories()
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener las categorías"})
 		return
 	}
-
-	c.JSON(http.StatusOK, categories)
+	c.JSON(http.StatusOK, dto.ToCategoryResponses(cats))
 }
 
 // CreateCategory godoc
-// @Summary Crear una nueva categoría
-// @Tags Categorías
-// @Accept json
-// @Produce json
-// @Param category body models.SwaggerCategory true "Datos de la categoría"
-// @Success 201 {object} models.SwaggerCategory
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /categories [post]
+// @Summary      Crear una nueva categoría
+// @Tags         Categorías
+// @Accept       json
+// @Produce      json
+// @Param        category  body  dto.CategoryRequest  true  "Datos de la categoría"
+// @Success      201  {object}  dto.CategoryResponse
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /categories [post]
 func CreateCategory(c *gin.Context) {
-	db := config.ConnectDB()
-	var category models.Category
-
-	if err := c.ShouldBindJSON(&category); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
+	var req dto.CategoryRequest
+	if err := c.ShouldBindJSON(&req); err != nil { // validator v10 corre detrás
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := db.Create(&category).Error; err != nil {
+	cat := dto.ToCategoryModel(req)
+	created, err := services.CreateCategory(cat)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo crear la categoría"})
 		return
 	}
-
-	c.JSON(http.StatusCreated, category)
+	c.JSON(http.StatusCreated, dto.ToCategoryResponse(created))
 }
 
 // UpdateCategory godoc
-// @Summary Actualizar una categoría
-// @Tags Categorías
-// @Accept json
-// @Produce json
-// @Param id path int true "ID de la categoría"
-// @Param category body models.SwaggerCategory true "Datos actualizados"
-// @Success 200 {object} models.SwaggerCategory
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /categories/{id} [put]
+// @Summary      Actualizar una categoría
+// @Tags         Categorías
+// @Accept       json
+// @Produce      json
+// @Param        id        path  int                  true  "ID de la categoría"
+// @Param        category  body  dto.CategoryRequest  true  "Datos actualizados"
+// @Success      200  {object}  dto.CategoryResponse
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /categories/{id} [put]
 func UpdateCategory(c *gin.Context) {
-	db := config.ConnectDB()
-	id := c.Param("id")
-
-	var existing models.Category
-	if err := db.First(&existing, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Categoría no encontrada"})
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
 		return
 	}
 
-	var updated models.Category
-	if err := c.ShouldBindJSON(&updated); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
+	var req dto.CategoryRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	existing.Name = updated.Name
-
-	if err := db.Save(&existing).Error; err != nil {
+	cat := dto.ToCategoryModel(req)
+	updated, err := services.UpdateCategory(uint(id), cat)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo actualizar la categoría"})
 		return
 	}
-
-	c.JSON(http.StatusOK, existing)
+	c.JSON(http.StatusOK, dto.ToCategoryResponse(updated))
 }
 
 // DeleteCategory godoc
-// @Summary Eliminar una categoría
-// @Tags Categorías
-// @Produce json
-// @Param id path int true "ID de la categoría"
-// @Success 200 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /categories/{id} [delete]
+// @Summary      Eliminar una categoría
+// @Tags         Categorías
+// @Produce      json
+// @Param        id  path  int  true  "ID de la categoría"
+// @Success      200  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /categories/{id} [delete]
 func DeleteCategory(c *gin.Context) {
-	db := config.ConnectDB()
-	id := c.Param("id")
-
-	var category models.Category
-	if err := db.First(&category, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Categoría no encontrada"})
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
 		return
 	}
 
-	if err := db.Delete(&category).Error; err != nil {
+	if err := services.DeleteCategory(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo eliminar la categoría"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"message": "Categoría eliminada"})
 }

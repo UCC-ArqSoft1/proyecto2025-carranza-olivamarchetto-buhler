@@ -1,56 +1,63 @@
 package controllers
 
 import (
-    "net/http"
-    "proyecto-gimnasio/services"
+	"net/http"
+	"strconv"
 
-    "github.com/gin-gonic/gin"
+	"proyecto-gimnasio/dto"
+	"proyecto-gimnasio/services"
+
+	"github.com/gin-gonic/gin"
 )
 
 // EnrollUserInActivity godoc
-// @Summary Inscribir usuario en una actividad
-// @Tags Inscripciones
-// @Accept json
-// @Produce json
-// @Param inscripcion body object true "user_id y activity_id"
-// @Success 201 {object} map[string]string
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /activities/enroll [post]
+// @Summary      Inscribir usuario en una actividad
+// @Tags         Inscripciones
+// @Accept       json
+// @Produce      json
+// @Param        enrollment  body  dto.RegistrationRequest  true  "user_id y activity_id"
+// @Success      201  {object}  dto.RegistrationResponse
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /activities/enroll [post]
 func EnrollUserInActivity(c *gin.Context) {
-    var input struct {
-        UserID     uint `json:"user_id"`
-        ActivityID uint `json:"activity_id"`
-    }
+	var req dto.RegistrationRequest
+	if err := c.ShouldBindJSON(&req); err != nil { // validator v10 corre detrás
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-    if err := c.ShouldBindJSON(&input); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
-        return
-    }
+	reg := dto.ToRegistrationModel(req)
+	created, err := services.RegisterUserToActivity(reg) // cambia la firma del service
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo registrar la inscripción"})
+		return
+	}
 
-    err := services.RegisterUserToActivity(input.UserID, input.ActivityID)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo registrar la inscripción"})
-        return
-    }
-
-    c.JSON(http.StatusCreated, gin.H{"message": "Inscripción exitosa"})
+	c.JSON(http.StatusCreated, dto.ToRegistrationResponse(created))
 }
 
 // GetUserActivities godoc
-// @Summary Ver actividades de un usuario
-// @Tags Inscripciones
-// @Produce json
-// @Param user_id path int true "ID del usuario"
-// @Success 200 {array} models.SwaggerActivity
-// @Failure 500 {object} map[string]string
-// @Router /users/{user_id}/activities [get]
+// @Summary      Ver actividades de un usuario
+// @Tags         Inscripciones
+// @Produce      json
+// @Param        user_id  path  int  true  "ID del usuario"
+// @Success      200  {array}  dto.ActivityResponse
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /users/{user_id}/activities [get]
 func GetUserActivities(c *gin.Context) {
-    userID := c.Param("user_id")
-    activities, err := services.GetActivitiesByUser(userID)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudieron obtener las actividades del usuario"})
-        return
-    }
-    c.JSON(http.StatusOK, activities)
+	idStr := c.Param("user_id")
+	uid, err := strconv.Atoi(idStr)
+	if err != nil || uid <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id inválido"})
+		return
+	}
+
+	acts, err := services.GetActivitiesByUser(uint(uid))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudieron obtener las actividades del usuario"})
+		return
+	}
+	c.JSON(http.StatusOK, dto.ToActivityResponses(acts))
 }

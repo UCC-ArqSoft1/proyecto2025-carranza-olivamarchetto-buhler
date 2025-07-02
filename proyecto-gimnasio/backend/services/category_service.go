@@ -1,3 +1,4 @@
+// services/category_service.go
 package services
 
 import (
@@ -5,39 +6,34 @@ import (
 	"proyecto-gimnasio/models"
 )
 
-func CreateCategory(category models.Category) error {
+func CreateCategory(c models.Category) (models.Category, error) {
 	db := config.ConnectDB()
-	result := db.Create(&category)
-	return result.Error
+	return c, db.Create(&c).Error
 }
 
 func GetAllCategories() ([]models.Category, error) {
 	db := config.ConnectDB()
-	var categories []models.Category
-	result := db.Find(&categories)
-	return categories, result.Error
+	var list []models.Category
+	return list, db.Find(&list).Error
 }
 
-func GetCategoryByID(id string) (models.Category, error) {
+func GetCategoryByID(id uint) (models.Category, error) {
 	db := config.ConnectDB()
-	var category models.Category
-	result := db.First(&category, id)
-	return category, result.Error
+	var cat models.Category
+	return cat, db.First(&cat, id).Error
 }
 
-func UpdateCategory(id string, updated models.Category) error {
+func UpdateCategory(id uint, upd models.Category) (models.Category, error) {
 	db := config.ConnectDB()
-	var category models.Category
-
-	if err := db.First(&category, id).Error; err != nil {
-		return err
+	var cat models.Category
+	if err := db.First(&cat, id).Error; err != nil {
+		return cat, err
 	}
-
-	category.Name = updated.Name
-	return db.Save(&category).Error
+	cat.Name = upd.Name
+	return cat, db.Save(&cat).Error
 }
 
-func DeleteCategory(id string) error {
+func DeleteCategory(id uint) error {
 	db := config.ConnectDB()
 	return db.Delete(&models.Category{}, id).Error
-} 
+}

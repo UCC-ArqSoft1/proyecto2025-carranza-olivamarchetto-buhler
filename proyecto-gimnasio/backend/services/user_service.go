@@ -5,9 +5,8 @@ import (
     "proyecto-gimnasio/models"
 )
 
-func CreateUser(user models.User) error {
-    db := config.ConnectDB()
-    user.Password = HashPassword(user.Password) // esta viene de auth_service.go
-    result := db.Create(&user)
-    return result.Error
+func CreateUser(u models.User) (models.User, error) {
+	db := config.ConnectDB()
+	u.Password = HashPassword(u.Password)
+	return u, db.Create(&u).Error
 }

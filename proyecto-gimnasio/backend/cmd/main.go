@@ -29,13 +29,15 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	err := godotenv.Load()	
+	if err := godotenv.Load(); err != nil {
+		log.Println("⚠️  .env no encontrado, continuar con variables de entorno por defecto")
 	}
 	db := config.ConnectDB()
 	seed.SeedAdminUser()
 	fmt.Println("Base de datos conectada:", db)
+
+	seed.SeedAdminUser()
 
 	// Crear instancia de router Gin
 	router := gin.Default()

@@ -6,36 +6,32 @@ import (
 	"proyecto-gimnasio/models"
 )
 
-func RegisterUserToActivity(userID, activityID uint) error {
+func RegisterUserToActivity(reg models.Registration) (models.Registration, error) {
 	db := config.ConnectDB()
 
-	// verificar si ya está inscripto
-	var existing models.Registration
-	if err := db.Where("user_id = ? AND activity_id = ?", userID, activityID).First(&existing).Error; err == nil {
-		return fmt.Errorf("Ya estás inscripto en esta actividad")
+	// exists?
+	var tmp models.Registration
+	if err := db.Where("user_id = ? AND activity_id = ?", reg.UserID, reg.ActivityID).
+		First(&tmp).Error; err == nil {
+		return reg, fmt.Errorf("ya inscripto")
 	}
 
-	// contar inscriptos actuales
+	// cupo
 	var count int64
-	db.Model(&models.Registration{}).Where("activity_id = ?", activityID).Count(&count)
+	db.Model(&models.Registration{}).Where("activity_id = ?", reg.ActivityID).Count(&count)
 
-	var activity models.Activity
-	if err := db.First(&activity, activityID).Error; err != nil {
-		return err
+	var act models.Activity
+	if err := db.First(&act, reg.ActivityID).Error; err != nil {
+		return reg, err
+	}
+	if int(count) >= act.Capacity {
+		return reg, fmt.Errorf("actividad completa")
 	}
 
-	if int(count) >= activity.Capacity {
-		return fmt.Errorf("La actividad ya está completa")
-	}
-
-	inscription := models.Registration{
-		UserID:     userID,
-		ActivityID: activityID,
-	}
-	return db.Create(&inscription).Error
+	return reg, db.Create(&reg).Error
 }
 
-func GetActivitiesByUser(userID string) ([]models.Activity, error) {
+func GetActivitiesByUser(userID uint) ([]models.Activity, error)  {
 	db := config.ConnectDB()
 	var activities []models.Activity
 
