@@ -38,7 +38,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.SwaggerActivity"
+                                "$ref": "#/definitions/dto.ActivityResponse"
                             }
                         }
                     },
@@ -68,12 +68,17 @@ const docTemplate = `{
                 "summary": "Inscribir usuario en una actividad",
                 "parameters": [
                     {
-                        "description": "user_id y activity_id",
-                        "name": "inscripcion",
+                        "description": "Solo activity_id (user_id viene del token)",
+                        "name": "enrollment",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object"
+                            "type": "object",
+                            "properties": {
+                                "activity_id": {
+                                    "type": "integer"
+                                }
+                            }
                         }
                     }
                 ],
@@ -81,14 +86,20 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
+                            "$ref": "#/definitions/dto.RegistrationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
                             "type": "object",
                             "additionalProperties": {
                                 "type": "string"
                             }
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -130,11 +141,127 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.SwaggerActivity"
+                            "$ref": "#/definitions/dto.ActivityResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/activities/{id}/enrollments": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inscripciones"
+                ],
+                "summary": "Ver usuarios inscritos en una actividad (solo admin)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID de la actividad",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.UserResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/activities/{id}/unenroll": {
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inscripciones"
+                ],
+                "summary": "Desinscribirse de una actividad",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID de la actividad",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -164,7 +291,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SwaggerActivity"
+                            "$ref": "#/definitions/dto.ActivityRequest"
                         }
                     }
                 ],
@@ -172,10 +299,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ActivityResponse"
                         }
                     },
                     "400": {
@@ -225,7 +349,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SwaggerActivity"
+                            "$ref": "#/definitions/dto.ActivityRequest"
                         }
                     }
                 ],
@@ -233,10 +357,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ActivityResponse"
                         }
                     },
                     "400": {
@@ -286,6 +407,340 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/stats/activities": {
+            "get": {
+                "description": "Retorna estadísticas detalladas de todas las actividades incluyendo ocupación, cupos disponibles, etc.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Estadísticas"
+                ],
+                "summary": "Obtener estadísticas de todas las actividades",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.ActivityStatsResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/stats/days": {
+            "get": {
+                "description": "Retorna estadísticas agrupadas por día de la semana",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Estadísticas"
+                ],
+                "summary": "Obtener estadísticas por día de la semana",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.DayStatsResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/stats/enrollments": {
+            "get": {
+                "description": "Retorna estadísticas generales de inscripciones: totales, promedios, días populares",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Estadísticas"
+                ],
+                "summary": "Obtener estadísticas de inscripciones",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.EnrollmentStatsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/stats/popular-activities": {
+            "get": {
+                "description": "Retorna las actividades ordenadas por número de inscripciones (ranking)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Estadísticas"
+                ],
+                "summary": "Obtener actividades más populares",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Límite de resultados (default: 10)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.PopularActivityResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/stats/users": {
+            "get": {
+                "description": "Retorna estadísticas generales del sistema de usuarios: totales por rol, activos/inactivos",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Estadísticas"
+                ],
+                "summary": "Obtener estadísticas de usuarios",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserStatsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Administración de Usuarios"
+                ],
+                "summary": "Listar todos los usuarios (solo admin)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.UserResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Administración de Usuarios"
+                ],
+                "summary": "Actualizar usuario (solo admin)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID del usuario",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Datos actualizados",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Administración de Usuarios"
+                ],
+                "summary": "Eliminar usuario (solo admin)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID del usuario",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -313,7 +768,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.SwaggerCategory"
+                                "$ref": "#/definitions/dto.CategoryResponse"
                             }
                         }
                     },
@@ -346,7 +801,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SwaggerCategory"
+                            "$ref": "#/definitions/dto.CategoryRequest"
                         }
                     }
                 ],
@@ -354,7 +809,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.SwaggerCategory"
+                            "$ref": "#/definitions/dto.CategoryResponse"
                         }
                     },
                     "400": {
@@ -404,7 +859,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SwaggerCategory"
+                            "$ref": "#/definitions/dto.CategoryRequest"
                         }
                     }
                 ],
@@ -412,7 +867,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.SwaggerCategory"
+                            "$ref": "#/definitions/dto.CategoryResponse"
                         }
                     },
                     "400": {
@@ -511,7 +966,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SwaggerUser"
+                            "$ref": "#/definitions/dto.LoginRequest"
                         }
                     }
                 ],
@@ -519,10 +974,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.LoginResponse"
                         }
                     },
                     "400": {
@@ -574,13 +1026,64 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SwaggerUser"
+                            "$ref": "#/definitions/dto.UserRequest"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
                         "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/change-password": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Perfil de Usuario"
+                ],
+                "summary": "Cambiar contraseña",
+                "parameters": [
+                    {
+                        "description": "Contraseñas",
+                        "name": "passwords",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ChangePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -590,6 +1093,119 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/profile": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Perfil de Usuario"
+                ],
+                "summary": "Ver perfil propio",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProfileResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Perfil de Usuario"
+                ],
+                "summary": "Actualizar perfil propio",
+                "parameters": [
+                    {
+                        "description": "Datos del perfil",
+                        "name": "profile",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProfileUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProfileResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -633,7 +1249,34 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.SwaggerActivity"
+                                "$ref": "#/definitions/dto.ActivityResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
                             }
                         }
                     },
@@ -651,11 +1294,73 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.SwaggerActivity": {
+        "dto.ActivityRequest": {
+            "type": "object",
+            "required": [
+                "capacity",
+                "category_id",
+                "day",
+                "duration",
+                "frequency",
+                "name",
+                "start_hour"
+            ],
+            "properties": {
+                "capacity": {
+                    "type": "integer"
+                },
+                "category_id": {
+                    "type": "integer"
+                },
+                "day": {
+                    "type": "string",
+                    "enum": [
+                        "Lunes",
+                        "Martes",
+                        "Miercoles",
+                        "Jueves",
+                        "Viernes",
+                        "Sabado",
+                        "Domingo"
+                    ]
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "frequency": {
+                    "type": "string",
+                    "enum": [
+                        "Semanal",
+                        "Mensual",
+                        "Unica"
+                    ]
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "start_hour": {
+                    "description": "\"HH:MM\"",
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ActivityResponse": {
             "type": "object",
             "properties": {
                 "capacity": {
                     "type": "integer"
+                },
+                "category": {
+                    "description": "← nil si no precargas",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.CategoryResponse"
+                        }
+                    ]
                 },
                 "category_id": {
                     "type": "integer"
@@ -683,7 +1388,52 @@ const docTemplate = `{
                 }
             }
         },
-        "models.SwaggerCategory": {
+        "dto.ActivityStatsResponse": {
+            "type": "object",
+            "properties": {
+                "activity_id": {
+                    "type": "integer"
+                },
+                "activity_name": {
+                    "type": "string"
+                },
+                "available_spots": {
+                    "type": "integer"
+                },
+                "capacity": {
+                    "type": "integer"
+                },
+                "category_name": {
+                    "type": "string"
+                },
+                "current_enrolled": {
+                    "type": "integer"
+                },
+                "day": {
+                    "type": "string"
+                },
+                "occupancy_rate": {
+                    "description": "Porcentaje de ocupación",
+                    "type": "number"
+                },
+                "start_hour": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CategoryRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "minLength": 3
+                }
+            }
+        },
+        "dto.CategoryResponse": {
             "type": "object",
             "properties": {
                 "id": {
@@ -694,17 +1444,247 @@ const docTemplate = `{
                 }
             }
         },
-        "models.SwaggerUser": {
+        "dto.ChangePasswordRequest": {
+            "type": "object",
+            "required": [
+                "current_password",
+                "new_password"
+            ],
+            "properties": {
+                "current_password": {
+                    "type": "string"
+                },
+                "new_password": {
+                    "type": "string",
+                    "minLength": 8
+                }
+            }
+        },
+        "dto.DayStatsResponse": {
+            "type": "object",
+            "properties": {
+                "day": {
+                    "type": "string"
+                },
+                "total_activities": {
+                    "type": "integer"
+                },
+                "total_enrollments": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.EnrollmentStatsResponse": {
+            "type": "object",
+            "properties": {
+                "average_per_activity": {
+                    "type": "number"
+                },
+                "average_per_user": {
+                    "type": "number"
+                },
+                "least_popular_day": {
+                    "type": "string"
+                },
+                "most_popular_day": {
+                    "type": "string"
+                },
+                "total_enrollments": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.LoginRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "minLength": 8
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PopularActivityResponse": {
+            "type": "object",
+            "properties": {
+                "activity_id": {
+                    "type": "integer"
+                },
+                "activity_name": {
+                    "type": "string"
+                },
+                "capacity": {
+                    "type": "integer"
+                },
+                "category_name": {
+                    "type": "string"
+                },
+                "day": {
+                    "type": "string"
+                },
+                "enrollment_count": {
+                    "type": "integer"
+                },
+                "occupancy_rate": {
+                    "type": "number"
+                },
+                "rank": {
+                    "description": "Posición en el ranking",
+                    "type": "integer"
+                },
+                "start_hour": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ProfileResponse": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "integer"
                 },
-                "password": {
+                "role": {
+                    "$ref": "#/definitions/dto.UserRole"
+                },
+                "username": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.ProfileUpdateRequest": {
+            "type": "object",
+            "required": [
+                "username"
+            ],
+            "properties": {
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RegistrationResponse": {
+            "type": "object",
+            "properties": {
+                "activity_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UserRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "role",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "minLength": 8
                 },
                 "role": {
+                    "enum": [
+                        "admin",
+                        "socio"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.UserRole"
+                        }
+                    ]
+                },
+                "username": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.UserResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "role": {
+                    "$ref": "#/definitions/dto.UserRole"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UserRole": {
+            "type": "string",
+            "enum": [
+                "admin",
+                "socio"
+            ],
+            "x-enum-varnames": [
+                "RoleAdmin",
+                "RoleSocio"
+            ]
+        },
+        "dto.UserStatsResponse": {
+            "type": "object",
+            "properties": {
+                "active_users": {
+                    "description": "Usuarios con al menos 1 inscripción",
+                    "type": "integer"
+                },
+                "inactive_users": {
+                    "description": "Usuarios sin inscripciones",
+                    "type": "integer"
+                },
+                "total_admins": {
+                    "type": "integer"
+                },
+                "total_socios": {
+                    "type": "integer"
+                },
+                "total_users": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UserUpdateRequest": {
+            "type": "object",
+            "required": [
+                "role",
+                "username"
+            ],
+            "properties": {
+                "role": {
+                    "enum": [
+                        "admin",
+                        "socio"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.UserRole"
+                        }
+                    ]
                 },
                 "username": {
                     "type": "string"

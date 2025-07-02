@@ -20,6 +20,11 @@ func SetupRoutes(router *gin.Engine) {
         authenticated.POST("/activities/enroll", controllers.EnrollUserInActivity)
         authenticated.GET("/users/:user_id/activities", controllers.GetUserActivities)
         authenticated.DELETE("/activities/:id/unenroll", controllers.UnenrollFromActivity)
+        
+        // Gestión de perfil propio
+        authenticated.GET("/users/profile", controllers.GetProfile)
+        authenticated.PUT("/users/profile", controllers.UpdateProfile)
+        authenticated.PUT("/users/change-password", controllers.ChangePassword)
     }
 
     // ========== RUTAS SOLO PARA ADMIN ==========
@@ -42,6 +47,11 @@ func SetupRoutes(router *gin.Engine) {
         admin.GET("/stats/enrollments", controllers.GetEnrollmentStats)
         admin.GET("/stats/popular-activities", controllers.GetPopularActivities)
         admin.GET("/stats/days", controllers.GetDayStats)
+        
+        // Gestión de usuarios
+        admin.GET("/users", controllers.GetAllUsers)
+        admin.PUT("/users/:id", controllers.UpdateUser)
+        admin.DELETE("/users/:id", controllers.DeleteUser)
     }
 
 }
