@@ -18,6 +18,14 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
+  Avatar,
+  Paper,
+  Fade,
+  Slide,
+  CardHeader,
+  LinearProgress,
+  Tooltip,
+  Badge,
 } from "@mui/material"
 import {
   Person,
@@ -29,6 +37,11 @@ import {
   VisibilityOff,
   AdminPanelSettings,
   AccountCircle,
+  Security,
+  CheckCircle,
+  Info,
+  FitnessCenter,
+  Timeline,
 } from "@mui/icons-material"
 import { useAuthStore } from "../services/auth-store"
 import API from "../services/api"
@@ -190,6 +203,25 @@ export default function UserProfile() {
     return role === "admin" ? "Administrador" : "Socio"
   }
 
+  const getAvatarColor = (role) => {
+    return role === "admin" ? "secondary.main" : "primary.main"
+  }
+
+  const getProfileCompletionPercentage = () => {
+    let completion = 0
+    if (profile?.id) completion += 25
+    if (profile?.username) completion += 25
+    if (profile?.role) completion += 25
+    // Could add more fields like email, phone, etc.
+    completion += 25 // Base completion for having an account
+    return completion
+  }
+
+  const getInitials = (username) => {
+    if (!username) return "U"
+    return username.substring(0, 2).toUpperCase()
+  }
+
   if (loading) {
     return (
       <Container maxWidth="md">
@@ -218,141 +250,242 @@ export default function UserProfile() {
   }
 
   return (
-    <Container maxWidth="md">
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
-          <AccountCircle sx={{ mr: 2, fontSize: "inherit" }} />
-          Mi Perfil
-        </Typography>
-        <Typography variant="h6" color="text.secondary">
-          Gestiona tu información personal y configuración de cuenta
-        </Typography>
-      </Box>
+    <Container maxWidth="lg">
+      {/* Profile Header */}
+      
 
       <Grid container spacing={3}>
-        {/* Profile Information Card */}
+        {/* Profile Information Section */}
         <Grid item xs={12} md={8}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-                <Typography variant="h6">
-                  Información Personal
-                </Typography>
-                {!editMode && (
-                  <Button
-                    variant="outlined"
-                    startIcon={<Edit />}
-                    onClick={handleEditProfile}
-                    disabled={isSubmitting}
-                  >
-                    Editar
-                  </Button>
+          <Fade in timeout={700}>
+            <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
+              <CardHeader
+                avatar={<AccountCircle color="primary" />}
+                title="Información Personal"
+                subheader="Gestiona tus datos personales"
+                action={
+                  !editMode && (
+                    <Tooltip title="Editar información personal">
+                      <Button
+                        variant="outlined"
+                        startIcon={<Edit />}
+                        onClick={handleEditProfile}
+                        disabled={isSubmitting}
+                        sx={{ borderRadius: 2 }}
+                      >
+                        Editar
+                      </Button>
+                    </Tooltip>
+                  )
+                }
+              />
+              <Divider />
+              <CardContent sx={{ p: 3 }}>
+                {editMode ? (
+                  <Slide direction="up" in={editMode} timeout={300}>
+                    <Box>
+                      <Alert severity="info" sx={{ mb: 3 }}>
+                        <Typography variant="body2">
+                          Estás editando tu información personal. Los cambios se guardarán al hacer clic en "Guardar Cambios".
+                        </Typography>
+                      </Alert>
+                      <TextField
+                        label="Nombre de Usuario"
+                        value={profileForm.username}
+                        onChange={(e) => setProfileForm({ ...profileForm, username: e.target.value })}
+                        disabled={isSubmitting}
+                        fullWidth
+                        variant="outlined"
+                        helperText="Introduce tu nuevo nombre de usuario"
+                        InputProps={{
+                          startAdornment: <Person sx={{ mr: 1, color: 'text.secondary' }} />
+                        }}
+                        sx={{ mb: 3 }}
+                      />
+                      <Box sx={{ display: "flex", gap: 2 }}>
+                        <Button
+                          variant="contained"
+                          startIcon={isSubmitting ? <CircularProgress size={20} /> : <Save />}
+                          onClick={handleUpdateProfile}
+                          disabled={isSubmitting || !profileForm.username.trim()}
+                          sx={{ borderRadius: 2 }}
+                        >
+                          {isSubmitting ? "Guardando..." : "Guardar Cambios"}
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          startIcon={<Cancel />}
+                          onClick={handleCancelEdit}
+                          disabled={isSubmitting}
+                          sx={{ borderRadius: 2 }}
+                        >
+                          Cancelar
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Slide>
+                ) : (
+                  <Fade in={!editMode} timeout={300}>
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
+                          <Typography variant="caption" color="text.secondary" display="block">
+                            NOMBRE DE USUARIO
+                          </Typography>
+                          <Typography variant="h6" fontWeight="bold" sx={{ mt: 0.5 }}>
+                            {profile.username}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
+                          <Typography variant="caption" color="text.secondary" display="block">
+                            ROL EN EL SISTEMA
+                          </Typography>
+                          <Box sx={{ mt: 1 }}>
+                            <Chip
+                              label={getRoleLabel(profile.role)}
+                              color={getRoleColor(profile.role)}
+                              icon={getRoleIcon(profile.role)}
+                              variant="filled"
+                            />
+                          </Box>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
+                          <Typography variant="caption" color="text.secondary" display="block">
+                            IDENTIFICADOR ÚNICO
+                          </Typography>
+                          <Typography variant="h6" fontWeight="bold" sx={{ mt: 0.5 }}>
+                            #{profile.id}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </Fade>
                 )}
-              </Box>
-
-              <Box sx={{ space: 3 }}>
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    ID de Usuario
-                  </Typography>
-                  <Typography variant="body1" fontWeight="bold">
-                    #{profile.id}
-                  </Typography>
-                </Box>
-
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    Nombre de Usuario
-                  </Typography>
-                  {editMode ? (
-                    <TextField
-                      value={profileForm.username}
-                      onChange={(e) => setProfileForm({ ...profileForm, username: e.target.value })}
-                      disabled={isSubmitting}
-                      fullWidth
-                      size="small"
-                      helperText="Introduce tu nuevo nombre de usuario"
-                    />
-                  ) : (
-                    <Typography variant="body1" fontWeight="bold">
-                      {profile.username}
-                    </Typography>
-                  )}
-                </Box>
-
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    Rol en el Sistema
-                  </Typography>
-                  <Chip
-                    label={getRoleLabel(profile.role)}
-                    color={getRoleColor(profile.role)}
-                    icon={getRoleIcon(profile.role)}
-                    sx={{ mt: 0.5 }}
-                  />
-                </Box>
-
-                {editMode && (
-                  <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
-                    <Button
-                      variant="contained"
-                      startIcon={<Save />}
-                      onClick={handleUpdateProfile}
-                      disabled={isSubmitting || !profileForm.username.trim()}
-                    >
-                      {isSubmitting ? "Guardando..." : "Guardar Cambios"}
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      startIcon={<Cancel />}
-                      onClick={handleCancelEdit}
-                      disabled={isSubmitting}
-                    >
-                      Cancelar
-                    </Button>
-                  </Box>
-                )}
-              </Box>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Fade>
         </Grid>
 
-        {/* Security Card */}
+        {/* Security and Quick Actions */}
         <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Seguridad
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Mantén tu cuenta segura actualizando tu contraseña regularmente
-              </Typography>
-              
-              <Button
-                variant="contained"
-                color="secondary"
-                startIcon={<Lock />}
-                onClick={() => setChangePasswordDialog(true)}
-                fullWidth
-                disabled={isSubmitting}
-              >
-                Cambiar Contraseña
-              </Button>
-            </CardContent>
-          </Card>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {/* Security Card */}
+            <Fade in timeout={900}>
+              <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
+                <CardHeader
+                  avatar={<Security color="secondary" />}
+                  title="Seguridad"
+                  subheader="Protege tu cuenta"
+                />
+                <Divider />
+                <CardContent>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    Mantén tu cuenta segura actualizando tu contraseña regularmente
+                  </Typography>
+                  
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    startIcon={<Lock />}
+                    onClick={() => setChangePasswordDialog(true)}
+                    fullWidth
+                    disabled={isSubmitting}
+                    sx={{ borderRadius: 2, py: 1.5 }}
+                  >
+                    Cambiar Contraseña
+                  </Button>
+                </CardContent>
+              </Card>
+            </Fade>
+
+            {/* Quick Stats Card */}
+            <Fade in timeout={1100}>
+              <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
+                <CardHeader
+                  avatar={<Timeline color="primary" />}
+                  title="Estado de la Cuenta"
+                  subheader="Información general"
+                />
+                <Divider />
+                <CardContent>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Perfil completado
+                      </Typography>
+                      <Chip 
+                        label={`${getProfileCompletionPercentage()}%`} 
+                        color="success" 
+                        size="small" 
+                      />
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Tipo de cuenta
+                      </Typography>
+                      <Chip 
+                        label={getRoleLabel(profile.role)} 
+                        color={getRoleColor(profile.role)} 
+                        size="small" 
+                      />
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Estado
+                      </Typography>
+                      <Chip 
+                        label="Activo" 
+                        color="success" 
+                        size="small" 
+                        icon={<CheckCircle />}
+                      />
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Fade>
+          </Box>
         </Grid>
       </Grid>
 
-      {/* Change Password Dialog */}
-      <Dialog open={changePasswordDialog} onClose={handleClosePasswordDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Lock sx={{ mr: 1, color: "secondary.main" }} />
-            Cambiar Contraseña
+      {/* Enhanced Change Password Dialog */}
+      <Dialog 
+        open={changePasswordDialog} 
+        onClose={handleClosePasswordDialog} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: 3, overflow: 'visible' }
+        }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Avatar sx={{ bgcolor: 'secondary.main', mr: 2 }}>
+              <Lock />
+            </Avatar>
+            <Box>
+              <Typography variant="h6" fontWeight="bold">
+                Cambiar Contraseña
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Actualiza tu contraseña para mantener tu cuenta segura
+              </Typography>
+            </Box>
           </Box>
         </DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2, display: "flex", flexDirection: "column", gap: 3 }}>
+        
+        <DialogContent sx={{ pb: 2 }}>
+          <Alert severity="info" sx={{ mb: 3 }}>
+            <Typography variant="body2">
+              Tu nueva contraseña debe tener al menos 8 caracteres para mayor seguridad.
+            </Typography>
+          </Alert>
+          
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <TextField
               label="Contraseña Actual"
               type={showCurrentPassword ? "text" : "password"}
@@ -361,16 +494,20 @@ export default function UserProfile() {
               disabled={isSubmitting}
               fullWidth
               required
+              variant="outlined"
               InputProps={{
                 endAdornment: (
-                  <IconButton
-                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    edge="end"
-                  >
-                    {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
+                  <Tooltip title={showCurrentPassword ? "Ocultar contraseña" : "Mostrar contraseña"}>
+                    <IconButton
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      edge="end"
+                    >
+                      {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </Tooltip>
                 )
               }}
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
             
             <TextField
@@ -381,17 +518,35 @@ export default function UserProfile() {
               disabled={isSubmitting}
               fullWidth
               required
-              helperText="Mínimo 8 caracteres"
+              variant="outlined"
+              helperText={
+                <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                  {passwordForm.new_password.length >= 8 ? (
+                    <CheckCircle sx={{ fontSize: 16, color: 'success.main', mr: 0.5 }} />
+                  ) : (
+                    <Info sx={{ fontSize: 16, color: 'text.secondary', mr: 0.5 }} />
+                  )}
+                  <Typography variant="caption">
+                    {passwordForm.new_password.length >= 8 
+                      ? "Contraseña válida" 
+                      : `Mínimo 8 caracteres (${passwordForm.new_password.length}/8)`
+                    }
+                  </Typography>
+                </Box>
+              }
               InputProps={{
                 endAdornment: (
-                  <IconButton
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    edge="end"
-                  >
-                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
+                  <Tooltip title={showNewPassword ? "Ocultar contraseña" : "Mostrar contraseña"}>
+                    <IconButton
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      edge="end"
+                    >
+                      {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </Tooltip>
                 )
               }}
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
             
             <TextField
@@ -402,17 +557,44 @@ export default function UserProfile() {
               disabled={isSubmitting}
               fullWidth
               required
+              variant="outlined"
               error={passwordForm.confirmPassword && passwordForm.new_password !== passwordForm.confirmPassword}
               helperText={
-                passwordForm.confirmPassword && passwordForm.new_password !== passwordForm.confirmPassword
-                  ? "Las contraseñas no coinciden"
-                  : "Repite tu nueva contraseña"
+                passwordForm.confirmPassword ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                    {passwordForm.new_password === passwordForm.confirmPassword ? (
+                      <>
+                        <CheckCircle sx={{ fontSize: 16, color: 'success.main', mr: 0.5 }} />
+                        <Typography variant="caption" color="success.main">
+                          Las contraseñas coinciden
+                        </Typography>
+                      </>
+                    ) : (
+                      <>
+                        <Cancel sx={{ fontSize: 16, color: 'error.main', mr: 0.5 }} />
+                        <Typography variant="caption" color="error.main">
+                          Las contraseñas no coinciden
+                        </Typography>
+                      </>
+                    )}
+                  </Box>
+                ) : (
+                  <Typography variant="caption" color="text.secondary">
+                    Repite tu nueva contraseña
+                  </Typography>
+                )
               }
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClosePasswordDialog} disabled={isSubmitting}>
+        
+        <DialogActions sx={{ p: 3, pt: 1 }}>
+          <Button 
+            onClick={handleClosePasswordDialog} 
+            disabled={isSubmitting}
+            sx={{ borderRadius: 2 }}
+          >
             Cancelar
           </Button>
           <Button
@@ -424,23 +606,39 @@ export default function UserProfile() {
               !passwordForm.current_password.trim() || 
               !passwordForm.new_password.trim() || 
               !passwordForm.confirmPassword.trim() ||
-              passwordForm.new_password !== passwordForm.confirmPassword
+              passwordForm.new_password !== passwordForm.confirmPassword ||
+              passwordForm.new_password.length < 8
             }
             startIcon={isSubmitting ? <CircularProgress size={20} /> : <Lock />}
+            sx={{ borderRadius: 2, px: 3 }}
           >
             {isSubmitting ? "Cambiando..." : "Cambiar Contraseña"}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Success/Error Snackbar */}
+      {/* Enhanced Success/Error Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        TransitionComponent={Slide}
+        TransitionProps={{ direction: "up" }}
       >
-        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: "100%" }}>
+        <Alert 
+          onClose={handleSnackbarClose} 
+          severity={snackbar.severity} 
+          sx={{ 
+            width: "100%",
+            borderRadius: 2,
+            boxShadow: 3,
+            '& .MuiAlert-icon': {
+              fontSize: '1.5rem'
+            }
+          }}
+          variant="filled"
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
