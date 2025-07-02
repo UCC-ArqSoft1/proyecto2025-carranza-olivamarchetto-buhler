@@ -6,7 +6,7 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"proyecto-gimnasio/models" // Importá tus modelos (ajustá si el path es diferente)
+	"proyecto-gimnasio/models"
 )
 
 func ConnectDB() *gorm.DB {
