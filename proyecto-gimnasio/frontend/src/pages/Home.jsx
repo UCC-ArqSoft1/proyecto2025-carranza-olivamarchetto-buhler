@@ -41,16 +41,32 @@ export default function Home() {
   const filtered = activities.filter((a) => {
     const term = search.toLowerCase()
     return (
+      // Nombre de la actividad
       String(a.name || "")
         .toLowerCase()
         .includes(term) ||
-      String(a.category || "")
+      // Categoría (corregido: a.category.name)
+      String(a.category?.name || "")
         .toLowerCase()
         .includes(term) ||
+      // Día de la semana
+      String(a.day || "")
+        .toLowerCase()
+        .includes(term) ||
+      // Hora de inicio
       String(a.start_hour || a.hour || "")
         .toLowerCase()
         .includes(term) ||
-      String(a.day || "")
+      // Duración (ej: buscar "60", "minutos")
+      String(a.duration || "")
+        .toLowerCase()
+        .includes(term) ||
+      // Capacidad (ej: buscar "20", "personas")
+      String(a.capacity || "")
+        .toLowerCase()
+        .includes(term) ||
+      // Frecuencia (ej: buscar "semanal", "mensual")
+      String(a.frequency || "")
         .toLowerCase()
         .includes(term)
     )
@@ -85,7 +101,7 @@ export default function Home() {
       <Box sx={{ maxWidth: 600, mx: "auto", mb: 4 }}>
         <TextField
           fullWidth
-          placeholder="Buscar por nombre, horario o categoría..."
+          placeholder="Buscar por nombre, categoría, día, horario, duración, capacidad o frecuencia..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           InputProps={{
