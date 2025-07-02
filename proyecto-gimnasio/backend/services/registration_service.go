@@ -42,3 +42,30 @@ func GetActivitiesByUser(userID uint) ([]models.Activity, error)  {
 
 	return activities, result.Error
 }
+
+// UnenrollUserFromActivity elimina la inscripción de un usuario a una actividad
+func UnenrollUserFromActivity(userID, activityID uint) error {
+	db := config.ConnectDB()
+	
+	// Verificar que existe la inscripción
+	var registration models.Registration
+	if err := db.Where("user_id = ? AND activity_id = ?", userID, activityID).
+		First(&registration).Error; err != nil {
+		return fmt.Errorf("inscripción no encontrada")
+	}
+
+	// Eliminar la inscripción
+	return db.Delete(&registration).Error
+}
+
+// GetUsersByActivity obtiene todos los usuarios inscritos en una actividad
+func GetUsersByActivity(activityID uint) ([]models.User, error) {
+	db := config.ConnectDB()
+	var users []models.User
+
+	result := db.Joins("JOIN registrations ON registrations.user_id = users.id").
+		Where("registrations.activity_id = ?", activityID).
+		Find(&users)
+
+	return users, result.Error
+}

@@ -30,7 +30,19 @@ func AuthMiddleware(role string) gin.HandlerFunc {
         }
 
         claims, ok := token.Claims.(jwt.MapClaims)
-        if !ok || claims["role"] != role {
+        if !ok {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+            c.Abort()
+            return
+        }
+
+        // Siempre guardar información del usuario en el contexto
+        c.Set("user_id", uint(claims["user_id"].(float64)))
+        c.Set("username", claims["username"].(string))
+        c.Set("role", claims["role"].(string))
+
+        // Validar role específico si se requiere
+        if role != "" && claims["role"] != role {
             c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden access"})
             c.Abort()
             return

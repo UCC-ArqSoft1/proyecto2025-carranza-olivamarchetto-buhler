@@ -44,6 +44,15 @@ func ToUserResponse(u models.User) UserResponse {
     }
 }
 
+// ToUserResponses convierte un slice de modelos User a respuestas
+func ToUserResponses(users []models.User) []UserResponse {
+    out := make([]UserResponse, len(users))
+    for i, u := range users {
+        out[i] = ToUserResponse(u)
+    }
+    return out
+}
+
 // ---------- VALIDATOR INIT (opcional) ----------
 
 // RegisterCustomValidators se llama una sola vez (p. ej., en main.go) para

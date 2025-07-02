@@ -7,23 +7,34 @@ import (
 )
 
 func SetupRoutes(router *gin.Engine) {
+    // ========== RUTAS PÚBLICAS ==========
     router.POST("/login", controllers.Login)
+    router.POST("/register", controllers.RegisterUser)
+    router.GET("/activities", controllers.ListActivities)
+    router.GET("/activities/:id", controllers.GetActivityByID)
+    router.GET("/categories", controllers.ListCategories)
 
-    admin := router.Group("/admin").Use(middleware.AuthMiddleware("admin"))
+    // ========== RUTAS PARA USUARIOS AUTENTICADOS ==========
+    authenticated := router.Group("/").Use(middleware.AuthMiddleware(""))
     {
-        admin.POST("/activities", controllers.CreateActivity)
+        authenticated.POST("/activities/enroll", controllers.EnrollUserInActivity)
+        authenticated.GET("/users/:user_id/activities", controllers.GetUserActivities)
+        authenticated.DELETE("/activities/:id/unenroll", controllers.UnenrollFromActivity)
     }
 
-    router.GET("/activities", controllers.ListActivities)
-	router.POST("/register", controllers.RegisterUser)
-	router.GET("/activities/:id", controllers.GetActivityByID)
-	router.POST("/activities/enroll", controllers.EnrollUserInActivity)
-	router.GET("/users/:user_id/activities", controllers.GetUserActivities)
-	admin.PUT("/activities/:id", controllers.UpdateActivity)
-	admin.DELETE("/activities/:id", controllers.DeleteActivity)
-    router.GET("/categories", controllers.ListCategories)
-    router.POST("/categories", controllers.CreateCategory)
-    router.PUT("/categories/:id", controllers.UpdateCategory)
-    router.DELETE("/categories/:id", controllers.DeleteCategory)
+    // ========== RUTAS SOLO PARA ADMIN ==========
+    admin := router.Group("/admin").Use(middleware.AuthMiddleware("admin"))
+    {
+        // Gestión de actividades
+        admin.POST("/activities", controllers.CreateActivity)
+        admin.PUT("/activities/:id", controllers.UpdateActivity)
+        admin.DELETE("/activities/:id", controllers.DeleteActivity)
+        admin.GET("/activities/:id/enrollments", controllers.GetActivityEnrollments)
+        
+        // Gestión de categorías
+        admin.POST("/categories", controllers.CreateCategory)
+        admin.PUT("/categories/:id", controllers.UpdateCategory)
+        admin.DELETE("/categories/:id", controllers.DeleteCategory)
+    }
 
 }
