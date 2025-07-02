@@ -15,7 +15,7 @@ import {
   DialogContent,
   CircularProgress,
 } from "@mui/material"
-import { Add, Edit, Delete, CalendarToday, Schedule, People, Close, Category } from "@mui/icons-material"
+import { Add, Edit, Delete, CalendarToday, Schedule, People, Close, Category, Assessment } from "@mui/icons-material"
 import { toast } from "react-toastify"
 import { Link } from "react-router-dom"
 import ActivityForm from "../components/ActivityForm.jsx"
@@ -93,9 +93,14 @@ export default function AdminDashboard() {
             Gestiona las actividades del gimnasio
           </Typography>
         </Box>
-        <Button component={Link} to="/admin/categories" variant="outlined" startIcon={<Category />}>
-          Gestionar Categorías
-        </Button>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button component={Link} to="/admin/stats" variant="contained" startIcon={<Assessment />}>
+            Ver Estadísticas
+          </Button>
+          <Button component={Link} to="/admin/categories" variant="outlined" startIcon={<Category />}>
+            Gestionar Categorías
+          </Button>
+        </Box>
       </Box>
 
       {activities.length === 0 ? (

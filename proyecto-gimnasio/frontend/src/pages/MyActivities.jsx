@@ -12,8 +12,14 @@ import {
   Grid,
   Alert,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Snackbar,
 } from "@mui/material"
-import { CalendarToday, Schedule, People, FitnessCenter, Warning } from "@mui/icons-material"
+import { CalendarToday, Schedule, People, FitnessCenter, Warning, PersonRemove } from "@mui/icons-material"
 import { useAuthStore } from "../services/auth-store"
 import API from "../services/api"
 
@@ -21,6 +27,9 @@ export default function MyActivities() {
   const { user, isAuthenticated } = useAuthStore()
   const [activities, setActivities] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [unenrollDialog, setUnenrollDialog] = useState({ open: false, activity: null })
+  const [isUnenrolling, setIsUnenrolling] = useState(false)
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" })
 
   const load = async () => {
     if (!user?.id) return
@@ -33,6 +42,46 @@ export default function MyActivities() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleUnenrollClick = (activity) => {
+    setUnenrollDialog({ open: true, activity })
+  }
+
+  const handleUnenrollConfirm = async () => {
+    if (!unenrollDialog.activity) return
+
+    setIsUnenrolling(true)
+    try {
+      await API.delete(`/activities/${unenrollDialog.activity.id}/unenroll`)
+      
+      // Remove the activity from the local state
+      setActivities(prev => prev.filter(act => act.id !== unenrollDialog.activity.id))
+      
+      setSnackbar({
+        open: true,
+        message: `Te has desinscrito exitosamente de "${unenrollDialog.activity.name}"`,
+        severity: "success"
+      })
+    } catch (err) {
+      console.error("Error al desinscribirse de la actividad", err)
+      setSnackbar({
+        open: true,
+        message: err.response?.data?.error || "Error al desinscribirse de la actividad",
+        severity: "error"
+      })
+    } finally {
+      setIsUnenrolling(false)
+      setUnenrollDialog({ open: false, activity: null })
+    }
+  }
+
+  const handleUnenrollCancel = () => {
+    setUnenrollDialog({ open: false, activity: null })
+  }
+
+  const handleSnackbarClose = () => {
+    setSnackbar({ ...snackbar, open: false })
   }
 
   useEffect(() => {
@@ -130,7 +179,7 @@ export default function MyActivities() {
                   </Box>
                 </CardContent>
 
-                <CardActions>
+                <CardActions sx={{ flexDirection: "column", gap: 1 }}>
                   <Button
                     component={Link}
                     to={`/activities/${activity.id}`}
@@ -140,12 +189,69 @@ export default function MyActivities() {
                   >
                     Ver detalles
                   </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    fullWidth
+                    startIcon={<PersonRemove />}
+                    onClick={() => handleUnenrollClick(activity)}
+                  >
+                    Desinscribirse
+                  </Button>
                 </CardActions>
               </Card>
             </Grid>
           ))}
         </Grid>
       )}
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={unenrollDialog.open}
+        onClose={handleUnenrollCancel}
+        aria-labelledby="unenroll-dialog-title"
+        aria-describedby="unenroll-dialog-description"
+      >
+        <DialogTitle id="unenroll-dialog-title">
+          Confirmar desinscripción
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="unenroll-dialog-description">
+            ¿Estás seguro que deseas desinscribirte de la actividad "{unenrollDialog.activity?.name}"?
+            Esta acción no se puede deshacer.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleUnenrollCancel} color="inherit">
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleUnenrollConfirm} 
+            color="error" 
+            variant="contained"
+            disabled={isUnenrolling}
+            startIcon={isUnenrolling ? <CircularProgress size={20} /> : <PersonRemove />}
+          >
+            {isUnenrolling ? "Desinscribiendo..." : "Desinscribirse"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success/Error Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert 
+          onClose={handleSnackbarClose} 
+          severity={snackbar.severity} 
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   )
 }

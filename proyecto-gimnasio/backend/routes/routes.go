@@ -35,6 +35,13 @@ func SetupRoutes(router *gin.Engine) {
         admin.POST("/categories", controllers.CreateCategory)
         admin.PUT("/categories/:id", controllers.UpdateCategory)
         admin.DELETE("/categories/:id", controllers.DeleteCategory)
+        
+        // Estadísticas
+        admin.GET("/stats/activities", controllers.GetActivityStats)
+        admin.GET("/stats/users", controllers.GetUserStats)
+        admin.GET("/stats/enrollments", controllers.GetEnrollmentStats)
+        admin.GET("/stats/popular-activities", controllers.GetPopularActivities)
+        admin.GET("/stats/days", controllers.GetDayStats)
     }
 
 }
